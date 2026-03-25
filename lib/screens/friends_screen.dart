@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/friend_provider.dart';
 
 class FriendsScreen extends StatelessWidget {
@@ -11,6 +13,7 @@ class FriendsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final fp = context.watch<FriendProvider>();
 
     return Scaffold(
@@ -22,13 +25,13 @@ class FriendsScreen extends StatelessWidget {
           icon: Icon(Icons.chevron_left, color: context.textP),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Friends',
+        title: Text(lang.tr(AppLocalizations.kFriends),
             style: AppTextStyles.heading3.copyWith(color: context.textP)),
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.person_add_outlined, color: context.textP),
-            onPressed: () => _showAddFriendDialog(context, fp),
+            onPressed: () => _showAddFriendDialog(context, fp, lang),
           ),
         ],
       ),
@@ -47,16 +50,14 @@ class FriendsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text('My Invite Code',
-                      style: GoogleFonts.inter(
-                          fontSize: 12, color: Colors.white70)),
+                  Text(lang.tr(AppLocalizations.kMyInviteCode),
+                      style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () {
-                      Clipboard.setData(
-                          ClipboardData(text: fp.inviteCode));
+                      Clipboard.setData(ClipboardData(text: fp.inviteCode));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Code copied!')),
+                        SnackBar(content: Text(lang.tr(AppLocalizations.kCodeCopied))),
                       );
                     },
                     child: Row(
@@ -64,19 +65,15 @@ class FriendsScreen extends StatelessWidget {
                       children: [
                         Text(fp.inviteCode,
                             style: GoogleFonts.inter(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: 4)),
+                                fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 4)),
                         const SizedBox(width: 8),
                         const Icon(Icons.copy, color: Colors.white70, size: 18),
                       ],
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text('Share this code with friends & family',
-                      style: GoogleFonts.inter(
-                          fontSize: 11, color: Colors.white60)),
+                  Text(lang.tr(AppLocalizations.kShareCodeMessage),
+                      style: GoogleFonts.inter(fontSize: 11, color: Colors.white60)),
                 ],
               ),
             ),
@@ -84,7 +81,7 @@ class FriendsScreen extends StatelessWidget {
 
             // Pending requests
             if (fp.pendingRequests.isNotEmpty) ...[
-              Text('Pending Requests',
+              Text(lang.tr(AppLocalizations.kPendingRequests),
                   style: AppTextStyles.subtitle.copyWith(color: context.textP)),
               const SizedBox(height: 12),
               ...fp.pendingRequests.map((req) => Container(
@@ -100,20 +97,16 @@ class FriendsScreen extends StatelessWidget {
                         const Text('👋', style: TextStyle(fontSize: 24)),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text('Friend request',
-                              style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.textP)),
+                          child: Text(lang.tr(AppLocalizations.kFriendRequest),
+                              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: context.textP)),
                         ),
                         TextButton(
                           onPressed: () => fp.acceptRequest(req.id),
-                          child: const Text('Accept'),
+                          child: Text(lang.tr(AppLocalizations.kAccept)),
                         ),
                         TextButton(
                           onPressed: () => fp.declineRequest(req.id),
-                          child: const Text('Decline',
-                              style: TextStyle(color: Colors.grey)),
+                          child: Text(lang.tr(AppLocalizations.kDecline), style: const TextStyle(color: Colors.grey)),
                         ),
                       ],
                     ),
@@ -122,7 +115,7 @@ class FriendsScreen extends StatelessWidget {
             ],
 
             // Friends list
-            Text('Friends (${fp.friends.length})',
+            Text('${lang.tr(AppLocalizations.kFriends)} (${fp.friends.length})',
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
 
@@ -139,10 +132,10 @@ class FriendsScreen extends StatelessWidget {
                   children: [
                     const Text('👥', style: TextStyle(fontSize: 40)),
                     const SizedBox(height: 12),
-                    Text('No friends yet',
+                    Text(lang.tr(AppLocalizations.kNoFriendsYet),
                         style: AppTextStyles.subtitle.copyWith(color: context.textP)),
                     const SizedBox(height: 8),
-                    Text('Share your invite code to connect!',
+                    Text(lang.tr(AppLocalizations.kShareCodeToConnect),
                         style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
                   ],
                 ),
@@ -162,16 +155,10 @@ class FriendsScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 22,
-                        backgroundColor:
-                            AppColors.primary.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                         child: Text(
-                          friend.name.isNotEmpty
-                              ? friend.name[0].toUpperCase()
-                              : '?',
-                          style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary),
+                          friend.name.isNotEmpty ? friend.name[0].toUpperCase() : '?',
+                          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -182,37 +169,27 @@ class FriendsScreen extends StatelessWidget {
                             Row(
                               children: [
                                 Text(friend.name,
-                                    style: GoogleFonts.inter(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: context.textP)),
+                                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: context.textP)),
                                 if (friend.role != null) ...[
                                   const SizedBox(width: 6),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: AppColors.amber.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(friend.role!,
-                                        style: GoogleFonts.inter(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.amber)),
+                                        style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.amber)),
                                   ),
                                 ],
                               ],
                             ),
                             const SizedBox(height: 2),
-                            Text(
-                                '💎 ${friend.totalGems}  •  Today: ${(rate * 100).round()}%',
-                                style: GoogleFonts.inter(
-                                    fontSize: 12, color: context.textS)),
+                            Text('💎 ${friend.totalGems}  •  ${lang.tr(AppLocalizations.kToday)}: ${(rate * 100).round()}%',
+                                style: GoogleFonts.inter(fontSize: 12, color: context.textS)),
                           ],
                         ),
                       ),
-                      // Today's progress ring
                       SizedBox(
                         width: 36,
                         height: 36,
@@ -223,17 +200,10 @@ class FriendsScreen extends StatelessWidget {
                               value: rate,
                               strokeWidth: 3,
                               backgroundColor: context.border,
-                              valueColor: AlwaysStoppedAnimation(
-                                rate >= 1.0
-                                    ? AppColors.green
-                                    : AppColors.primary,
-                              ),
+                              valueColor: AlwaysStoppedAnimation(rate >= 1.0 ? AppColors.green : AppColors.primary),
                             ),
                             Text('${(rate * 100).round()}',
-                                style: GoogleFonts.inter(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    color: context.textP)),
+                                style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: context.textP)),
                           ],
                         ),
                       ),
@@ -248,7 +218,7 @@ class FriendsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddFriendDialog(BuildContext context, FriendProvider fp) {
+  void _showAddFriendDialog(BuildContext context, FriendProvider fp, LanguageProvider lang) {
     final codeCtrl = TextEditingController();
     String relationship = 'friend';
 
@@ -256,38 +226,35 @@ class FriendsScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Add Friend'),
+          title: Text(lang.tr(AppLocalizations.kAddFriend)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: codeCtrl,
                 textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
-                  hintText: 'Enter invite code',
-                  prefixIcon: Icon(Icons.vpn_key_outlined),
+                decoration: InputDecoration(
+                  hintText: lang.tr(AppLocalizations.kEnterInviteCode),
+                  prefixIcon: const Icon(Icons.vpn_key_outlined),
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Relationship:',
-                  style: GoogleFonts.inter(
-                      fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(lang.tr(AppLocalizations.kRelationship),
+                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
                   ChoiceChip(
-                    label: const Text('Friend'),
+                    label: Text(lang.tr(AppLocalizations.kFriend)),
                     selected: relationship == 'friend',
-                    onSelected: (_) =>
-                        setState(() => relationship = 'friend'),
+                    onSelected: (_) => setState(() => relationship = 'friend'),
                     selectedColor: AppColors.primary.withValues(alpha: 0.2),
                   ),
                   ChoiceChip(
-                    label: const Text('Parent-Child'),
+                    label: Text(lang.tr(AppLocalizations.kParentChild)),
                     selected: relationship == 'parent-child',
-                    onSelected: (_) =>
-                        setState(() => relationship = 'parent-child'),
+                    onSelected: (_) => setState(() => relationship = 'parent-child'),
                     selectedColor: AppColors.primary.withValues(alpha: 0.2),
                   ),
                 ],
@@ -297,25 +264,24 @@ class FriendsScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(lang.tr(AppLocalizations.kCancel)),
             ),
             TextButton(
               onPressed: () async {
                 final code = codeCtrl.text.trim();
                 if (code.isEmpty) return;
-                final ok = await fp.sendFriendRequest(code,
-                    relationship: relationship);
+                final ok = await fp.sendFriendRequest(code, relationship: relationship);
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(ok
-                            ? 'Friend request sent!'
-                            : 'Could not find user with that code')),
+                            ? lang.tr(AppLocalizations.kFriendRequestSent)
+                            : lang.tr(AppLocalizations.kCouldNotFindUser))),
                   );
                 }
               },
-              child: const Text('Send Request'),
+              child: Text(lang.tr(AppLocalizations.kSendRequest)),
             ),
           ],
         ),

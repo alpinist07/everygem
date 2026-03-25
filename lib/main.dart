@@ -7,6 +7,7 @@ import 'providers/habit_provider.dart';
 import 'providers/gem_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/language_provider.dart';
 import 'repositories/local/local_auth_repository.dart';
 import 'repositories/local/local_habit_repository.dart';
 import 'repositories/local/local_gem_repository.dart';
@@ -41,6 +42,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider(authRepo)),
         ChangeNotifierProvider(create: (_) => HabitProvider(habitRepo)),
         ChangeNotifierProvider(create: (_) => GemProvider(gemRepo)),

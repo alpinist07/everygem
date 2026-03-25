@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/gem_provider.dart';
 
 class RewardsScreen extends StatelessWidget {
@@ -10,6 +12,7 @@ class RewardsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final gem = context.watch<GemProvider>();
 
     return Scaffold(
@@ -21,11 +24,11 @@ class RewardsScreen extends StatelessWidget {
           icon: Icon(Icons.chevron_left, color: context.textP),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Rewards', style: AppTextStyles.heading3.copyWith(color: context.textP)),
+        title: Text(lang.tr(AppLocalizations.kRewards), style: AppTextStyles.heading3.copyWith(color: context.textP)),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddRewardDialog(context, gem),
+        onPressed: () => _showAddRewardDialog(context, gem, lang),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -47,21 +50,14 @@ class RewardsScreen extends StatelessWidget {
                   const Text('💎', style: TextStyle(fontSize: 40)),
                   const SizedBox(height: 8),
                   Text('${gem.totalGems}',
-                      style: GoogleFonts.inter(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white)),
-                  Text('Gems', style: GoogleFonts.inter(fontSize: 14, color: Colors.white70)),
+                      style: GoogleFonts.inter(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text(lang.tr(AppLocalizations.kGems), style: GoogleFonts.inter(fontSize: 14, color: Colors.white70)),
                   const SizedBox(height: 16),
-                  // Level progress
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(gem.levelName,
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white)),
+                      Text(lang.tr(gem.levelName),
+                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -77,7 +73,8 @@ class RewardsScreen extends StatelessWidget {
                   if (gem.gemsToNextLevel > 0)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
-                      child: Text('${gem.gemsToNextLevel} gems to next level',
+                      child: Text(
+                          lang.trWith(AppLocalizations.kGemsToNextLevel, {'count': '${gem.gemsToNextLevel}'}),
                           style: GoogleFonts.inter(fontSize: 11, color: Colors.white60)),
                     ),
                 ],
@@ -86,8 +83,7 @@ class RewardsScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Available rewards
-            Text('Available Rewards',
-                style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+            Text(lang.tr(AppLocalizations.kAvailableRewards), style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             if (gem.rewards.isEmpty)
               Container(
@@ -99,7 +95,7 @@ class RewardsScreen extends StatelessWidget {
                   border: Border.all(color: context.border),
                 ),
                 child: Center(
-                  child: Text('No rewards yet. Tap + to add one!',
+                  child: Text(lang.tr(AppLocalizations.kNoRewardsYet),
                       style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
                 ),
               )
@@ -121,13 +117,9 @@ class RewardsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(reward.name,
-                                  style: GoogleFonts.inter(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: context.textP)),
-                              Text('💎 ${reward.cost} gems',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 12, color: context.textS)),
+                                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: context.textP)),
+                              Text('💎 ${reward.cost} ${lang.tr(AppLocalizations.kGems)}',
+                                  style: GoogleFonts.inter(fontSize: 12, color: context.textS)),
                             ],
                           ),
                         ),
@@ -137,9 +129,7 @@ class RewardsScreen extends StatelessWidget {
                                   final ok = await gem.redeemReward(reward.id);
                                   if (ok && context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              '🎉 ${reward.name} redeemed!')),
+                                      SnackBar(content: Text('🎉 ${reward.name} ${lang.tr(AppLocalizations.kRedeemed)}')),
                                     );
                                   }
                                 }
@@ -148,12 +138,10 @@ class RewardsScreen extends StatelessWidget {
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             disabledBackgroundColor: context.border,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
-                          child: const Text('Redeem'),
+                          child: Text(lang.tr(AppLocalizations.kRedeem)),
                         ),
                       ],
                     ),
@@ -161,26 +149,22 @@ class RewardsScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Recent gem history
-            Text('Recent History',
-                style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+            Text(lang.tr(AppLocalizations.kRecentHistory), style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             ...gem.logs.take(20).map((log) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
                       Icon(
-                        log.amount > 0
-                            ? Icons.add_circle_outline
-                            : Icons.remove_circle_outline,
+                        log.amount > 0 ? Icons.add_circle_outline : Icons.remove_circle_outline,
                         color: log.amount > 0 ? AppColors.green : AppColors.red,
                         size: 20,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          _reasonLabel(log.reason),
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: context.textP),
+                          _reasonLabel(log.reason, lang),
+                          style: GoogleFonts.inter(fontSize: 13, color: context.textP),
                         ),
                       ),
                       Text(
@@ -201,20 +185,20 @@ class RewardsScreen extends StatelessWidget {
     );
   }
 
-  String _reasonLabel(String reason) {
+  String _reasonLabel(String reason, LanguageProvider lang) {
     switch (reason) {
       case 'habit_complete':
-        return 'Habit completed';
+        return lang.tr(AppLocalizations.kHabitCompleted);
       case 'streak_bonus':
-        return 'Streak bonus';
+        return lang.tr(AppLocalizations.kStreakBonus);
       case 'reward_redeem':
-        return 'Reward redeemed';
+        return lang.tr(AppLocalizations.kRewardRedeemed);
       default:
         return reason;
     }
   }
 
-  void _showAddRewardDialog(BuildContext context, GemProvider gem) {
+  void _showAddRewardDialog(BuildContext context, GemProvider gem, LanguageProvider lang) {
     final nameCtrl = TextEditingController();
     final costCtrl = TextEditingController();
     String emoji = '🎁';
@@ -224,7 +208,7 @@ class RewardsScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Add Reward'),
+          title: Text(lang.tr(AppLocalizations.kAddReward)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -236,13 +220,9 @@ class RewardsScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: emoji == e
-                                  ? AppColors.primary.withValues(alpha: 0.1)
-                                  : null,
+                              color: emoji == e ? AppColors.primary.withValues(alpha: 0.1) : null,
                               borderRadius: BorderRadius.circular(8),
-                              border: emoji == e
-                                  ? Border.all(color: AppColors.primary)
-                                  : null,
+                              border: emoji == e ? Border.all(color: AppColors.primary) : null,
                             ),
                             child: Text(e, style: const TextStyle(fontSize: 24)),
                           ),
@@ -252,37 +232,30 @@ class RewardsScreen extends StatelessWidget {
               const SizedBox(height: 12),
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(
-                    hintText: 'Reward name (e.g. Ice cream)'),
+                decoration: InputDecoration(hintText: lang.tr(AppLocalizations.kRewardName)),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: costCtrl,
                 keyboardType: TextInputType.number,
-                decoration:
-                    const InputDecoration(hintText: 'Cost in gems (e.g. 50)'),
+                decoration: InputDecoration(hintText: lang.tr(AppLocalizations.kCostInGems)),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(lang.tr(AppLocalizations.kCancel)),
             ),
             TextButton(
               onPressed: () {
                 final name = nameCtrl.text.trim();
                 final cost = int.tryParse(costCtrl.text.trim());
                 if (name.isEmpty || cost == null || cost <= 0) return;
-                gem.addReward(
-                  name: name,
-                  emoji: emoji,
-                  cost: cost,
-                  createdBy: 'local',
-                );
+                gem.addReward(name: name, emoji: emoji, cost: cost, createdBy: 'local');
                 Navigator.pop(ctx);
               },
-              child: const Text('Add'),
+              child: Text(lang.tr(AppLocalizations.kAdd)),
             ),
           ],
         ),

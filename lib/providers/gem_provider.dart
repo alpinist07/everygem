@@ -30,10 +30,17 @@ class GemProvider extends ChangeNotifier {
     return 1;
   }
 
-  String get levelName {
-    const names = ['', '🌱 Seedling', '🌿 Sprout', '🌳 Tree', '💎 Gem', '👑 Diamond'];
-    return names[level];
-  }
+  String get levelName => levelNameKeys[level];
+
+  /// Returns the l10n key for the current level.
+  static const levelNameKeys = [
+    '',
+    'levelSeedling',
+    'levelSprout',
+    'levelTree',
+    'levelGem',
+    'levelDiamond',
+  ];
 
   int get gemsToNextLevel {
     const thresholds = [0, 51, 151, 301, 501];

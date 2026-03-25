@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/routes.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import 'home_screen.dart';
 import 'explore_screen.dart';
 import 'activity_screen.dart';
@@ -26,6 +29,8 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex >= 2 ? _currentIndex : _currentIndex,
@@ -73,26 +78,26 @@ class _MainNavigationState extends State<MainNavigation> {
               children: [
                 _NavItem(
                   icon: Icons.home_rounded,
-                  label: 'Home',
+                  label: lang.tr(AppLocalizations.kNavHome),
                   isActive: _currentIndex == 0,
                   onTap: () => setState(() => _currentIndex = 0),
                 ),
                 _NavItem(
                   icon: Icons.explore_outlined,
-                  label: 'Explore',
+                  label: lang.tr(AppLocalizations.kNavExplore),
                   isActive: _currentIndex == 1,
                   onTap: () => setState(() => _currentIndex = 1),
                 ),
                 const SizedBox(width: 56), // space for FAB
                 _NavItem(
                   icon: Icons.bar_chart_rounded,
-                  label: 'Activity',
+                  label: lang.tr(AppLocalizations.kNavActivity),
                   isActive: _currentIndex == 3,
                   onTap: () => setState(() => _currentIndex = 3),
                 ),
                 _NavItem(
                   icon: Icons.person_outline,
-                  label: 'Profile',
+                  label: lang.tr(AppLocalizations.kNavProfile),
                   isActive: _currentIndex == 4,
                   onTap: () => setState(() => _currentIndex = 4),
                 ),

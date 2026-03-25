@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
 import '../constants/routes.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/habit_provider.dart';
 import '../providers/gem_provider.dart';
 import '../providers/user_provider.dart';
@@ -39,11 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final userProvider = context.watch<UserProvider>();
     final habitProvider = context.watch<HabitProvider>();
     final gemProvider = context.watch<GemProvider>();
     final todayHabits = habitProvider.habitsForDate(_selectedDate);
     final completed = habitProvider.completedForDate(_selectedDate);
+
+    final dayLabels = [
+      lang.tr(AppLocalizations.kMon), lang.tr(AppLocalizations.kTue),
+      lang.tr(AppLocalizations.kWed), lang.tr(AppLocalizations.kThu),
+      lang.tr(AppLocalizations.kFri), lang.tr(AppLocalizations.kSat),
+      lang.tr(AppLocalizations.kSun),
+    ];
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -62,12 +71,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hi, ${userProvider.user?.name ?? 'there'} 👋',
+                          lang.trWith(AppLocalizations.kHiUser, {'name': userProvider.user?.name ?? ''}),
                           style: AppTextStyles.heading2.copyWith(color: context.textP),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Let's make habits together!",
+                          lang.tr(AppLocalizations.kLetsMakeHabits),
                           style: AppTextStyles.bodySmall.copyWith(color: context.textS),
                         ),
                       ],
@@ -123,7 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 72,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: _weekDates.map((date) {
+                  children: _weekDates.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final date = entry.value;
                     final isSelected = date.day == _selectedDate.day &&
                         date.month == _selectedDate.month;
                     final isToday = date.day == DateTime.now().day &&
@@ -143,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              DateFormat('E').format(date).substring(0, 2),
+                              dayLabels[i],
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -191,8 +202,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             todayHabits.isEmpty
-                                ? 'Add your first habit!'
-                                : '$completed/${todayHabits.length} habits completed',
+                                ? lang.tr(AppLocalizations.kAddFirstHabit)
+                                : lang.trWith(AppLocalizations.kHabitsCompleted, {
+                                    'completed': '$completed',
+                                    'total': '${todayHabits.length}',
+                                  }),
                             style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -201,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Your daily goals almost done! 🔥',
+                            lang.tr(AppLocalizations.kDailyGoalsAlmostDone),
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               color: Colors.white70,
@@ -219,11 +233,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Habits', style: AppTextStyles.heading3.copyWith(color: context.textP)),
+                  Text(lang.tr(AppLocalizations.kHabits), style: AppTextStyles.heading3.copyWith(color: context.textP)),
                   TextButton(
                     onPressed: () {},
                     child: Text(
-                      'VIEW ALL',
+                      lang.tr(AppLocalizations.kViewAll),
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -235,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 8),
 
               if (todayHabits.isEmpty)
-                _buildEmptyState()
+                _buildEmptyState(lang)
               else
                 ...todayHabits.map((habit) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -246,7 +260,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           final wasCompleted = habit.isCompletedOn(_selectedDate);
                           await habitProvider.toggleHabitCompletion(
                               habit.id, _selectedDate);
-                          // Award gems when completing (not uncompleting)
                           if (!wasCompleted && context.mounted) {
                             final amount = await gemProvider.awardGems(
                               habitId: habit.id,
@@ -265,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         },
-                        onDelete: () => _confirmDelete(context, habitProvider, habit),
+                        onDelete: () => _confirmDelete(context, habitProvider, habit, lang),
                       ),
                     )),
 
@@ -277,30 +290,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _confirmDelete(BuildContext context, HabitProvider provider, habit) {
+  void _confirmDelete(BuildContext context, HabitProvider provider, habit, LanguageProvider lang) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete Habit'),
-        content: Text('Are you sure you want to delete "${habit.name}"?'),
+        title: Text(lang.tr(AppLocalizations.kDeleteHabit)),
+        content: Text(lang.trWith(AppLocalizations.kDeleteHabitConfirm, {'name': habit.name})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(lang.tr(AppLocalizations.kCancel)),
           ),
           TextButton(
             onPressed: () {
               provider.deleteHabit(habit.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(lang.tr(AppLocalizations.kDelete), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(LanguageProvider lang) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -313,16 +326,15 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const Text('💎', style: TextStyle(fontSize: 48)),
           const SizedBox(height: 16),
-          Text('No habits yet', style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+          Text(lang.tr(AppLocalizations.kNoHabitsYet), style: AppTextStyles.subtitle.copyWith(color: context.textP)),
           const SizedBox(height: 8),
           Text(
-            'Tap + to add your first habit',
+            lang.tr(AppLocalizations.kTapToAddHabit),
             style: AppTextStyles.bodySmall.copyWith(color: context.textS),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.addHabit),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.addHabit),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
@@ -330,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Add Habit'),
+            child: Text(lang.tr(AppLocalizations.kAddHabit)),
           ),
         ],
       ),

@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
 import '../constants/routes.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/habit_provider.dart';
 import '../providers/gem_provider.dart';
@@ -20,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedTab = 0;
-  final _tabs = ['Activity', 'Achievements'];
 
   int _totalCompleted(List<Habit> habits) {
     return habits.fold<int>(
@@ -44,10 +45,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final user = context.watch<UserProvider>().user;
     final habits = context.watch<HabitProvider>().habits;
     final gem = context.watch<GemProvider>();
     final totalCompleted = _totalCompleted(habits);
+
+    final tabs = [lang.tr(AppLocalizations.kActivityTab), lang.tr(AppLocalizations.kAchievements)];
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -61,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Your Profile', style: AppTextStyles.heading2.copyWith(color: context.textP)),
+                  Text(lang.tr(AppLocalizations.kYourProfile), style: AppTextStyles.heading2.copyWith(color: context.textP)),
                   IconButton(
                     icon: Icon(Icons.settings_outlined, color: context.textP),
                     onPressed: () =>
@@ -76,8 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor:
-                        AppColors.primary.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Text(
                       user?.name.isNotEmpty == true
                           ? user!.name[0].toUpperCase()
@@ -93,10 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        user?.name ?? 'User',
-                        style: AppTextStyles.heading3,
-                      ),
+                      Text(user?.name ?? 'User', style: AppTextStyles.heading3),
                       GestureDetector(
                         onTap: () => Navigator.push(
                           context,
@@ -104,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         child: Row(
                           children: [
-                            Text(gem.levelName,
+                            Text(lang.tr(gem.levelName),
                                 style: GoogleFonts.inter(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -137,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     MaterialPageRoute(builder: (_) => const FriendsScreen()),
                   ),
                   icon: const Icon(Icons.group_outlined),
-                  label: const Text('Friends'),
+                  label: Text(lang.tr(AppLocalizations.kFriends)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary),
@@ -159,16 +159,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Row(
                   children: [
-                    _MiniStat(
-                        label: 'Habits', value: '${habits.length}'),
-                    _MiniStat(
-                        label: 'Completed', value: '$totalCompleted'),
-                    _MiniStat(
-                        label: 'Best Streak',
-                        value: '${_bestStreak(habits)}'),
-                    _MiniStat(
-                        label: 'Days Active',
-                        value: '${_daysActive(habits)}'),
+                    _MiniStat(label: lang.tr(AppLocalizations.kHabits), value: '${habits.length}'),
+                    _MiniStat(label: lang.tr(AppLocalizations.kCompleted), value: '$totalCompleted'),
+                    _MiniStat(label: lang.tr(AppLocalizations.kBestStreak), value: '${_bestStreak(habits)}'),
+                    _MiniStat(label: lang.tr(AppLocalizations.kDaysActive), value: '${_daysActive(habits)}'),
                   ],
                 ),
               ),
@@ -183,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 padding: const EdgeInsets.all(4),
                 child: Row(
-                  children: List.generate(_tabs.length, (i) {
+                  children: List.generate(tabs.length, (i) {
                     final isActive = i == _selectedTab;
                     return Expanded(
                       child: GestureDetector(
@@ -191,20 +185,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.primary
-                                : Colors.transparent,
+                            color: isActive ? AppColors.primary : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text(
-                              _tabs[i],
+                              tabs[i],
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: isActive
-                                    ? Colors.white
-                                    : context.textS,
+                                color: isActive ? Colors.white : context.textS,
                               ),
                             ),
                           ),
@@ -217,9 +207,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 20),
 
               if (_selectedTab == 0)
-                _buildActivityTab(habits, totalCompleted),
+                _buildActivityTab(habits, totalCompleted, lang),
               if (_selectedTab == 1)
-                _buildAchievementsTab(habits, totalCompleted),
+                _buildAchievementsTab(habits, totalCompleted, lang),
 
               const SizedBox(height: 80),
             ],
@@ -229,37 +219,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildActivityTab(List<Habit> habits, int totalCompleted) {
-    // 최근 활동 기록을 실제 데이터에서 생성
+  Widget _buildActivityTab(List<Habit> habits, int totalCompleted, LanguageProvider lang) {
     final activities = <_ActivityData>[];
-
-    // 오늘 완료한 습관들
     final now = DateTime.now();
     for (final h in habits) {
       if (h.isCompletedOn(now)) {
         activities.add(_ActivityData(
-          text: '${h.emoji} ${h.name} completed',
-          time: 'Today',
+          text: '${h.emoji} ${h.name} ${lang.tr(AppLocalizations.kCompletedAction)}',
+          time: lang.tr(AppLocalizations.kToday),
           icon: '✅',
         ));
       }
     }
-
-    // 스트릭 진행 중인 습관
     for (final h in habits) {
       if (h.currentStreak >= 3) {
         activities.add(_ActivityData(
-          text: '${h.emoji} ${h.name} - ${h.currentStreak} day streak!',
-          time: 'Ongoing',
+          text: '${h.emoji} ${h.name} - ${h.currentStreak} ${lang.tr(AppLocalizations.kDayStreak)}!',
+          time: lang.tr(AppLocalizations.kOngoing),
           icon: '🔥',
         ));
       }
     }
-
     if (activities.isEmpty) {
       activities.add(_ActivityData(
-        text: 'Complete a habit to see activity here',
-        time: 'Now',
+        text: lang.tr(AppLocalizations.kCompleteHabitToSee),
+        time: '',
         icon: '💡',
       ));
     }
@@ -267,59 +251,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Recent Activity', style: AppTextStyles.bodySmall),
+        Text(lang.tr(AppLocalizations.kRecentActivity), style: AppTextStyles.bodySmall),
         const SizedBox(height: 12),
-        ...activities.map((a) => _ActivityItem(
-              text: a.text,
-              time: a.time,
-              icon: a.icon,
-            )),
+        ...activities.map((a) => _ActivityItem(text: a.text, time: a.time, icon: a.icon)),
       ],
     );
   }
 
-  Widget _buildAchievementsTab(List<Habit> habits, int totalCompleted) {
+  Widget _buildAchievementsTab(List<Habit> habits, int totalCompleted, LanguageProvider lang) {
     final bestStreak = _bestStreak(habits);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _AchievementCard(
-          title: 'First Step!',
-          subtitle: 'Complete your first habit',
-          emoji: '🏆',
-          unlocked: totalCompleted >= 1,
-        ),
-        _AchievementCard(
-          title: 'Getting Started',
-          subtitle: 'Complete 10 habits',
-          emoji: '⭐',
-          unlocked: totalCompleted >= 10,
-        ),
-        _AchievementCard(
-          title: 'Consistent',
-          subtitle: '3 day streak',
-          emoji: '🔥',
-          unlocked: bestStreak >= 3,
-        ),
-        _AchievementCard(
-          title: 'On Fire',
-          subtitle: '7 day streak',
-          emoji: '💪',
-          unlocked: bestStreak >= 7,
-        ),
-        _AchievementCard(
-          title: 'Gem Collector',
-          subtitle: 'Complete 50 habits',
-          emoji: '💎',
-          unlocked: totalCompleted >= 50,
-        ),
-        _AchievementCard(
-          title: 'Unstoppable',
-          subtitle: '30 day streak',
-          emoji: '👑',
-          unlocked: bestStreak >= 30,
-        ),
+        _AchievementCard(title: lang.tr(AppLocalizations.kAchFirstStep), subtitle: lang.tr(AppLocalizations.kAchFirstStepSub), emoji: '🏆', unlocked: totalCompleted >= 1),
+        _AchievementCard(title: lang.tr(AppLocalizations.kAchGettingStarted), subtitle: lang.tr(AppLocalizations.kAchGettingStartedSub), emoji: '⭐', unlocked: totalCompleted >= 10),
+        _AchievementCard(title: lang.tr(AppLocalizations.kAchConsistent), subtitle: lang.tr(AppLocalizations.kAchConsistentSub), emoji: '🔥', unlocked: bestStreak >= 3),
+        _AchievementCard(title: lang.tr(AppLocalizations.kAchOnFire), subtitle: lang.tr(AppLocalizations.kAchOnFireSub), emoji: '💪', unlocked: bestStreak >= 7),
+        _AchievementCard(title: lang.tr(AppLocalizations.kAchGemCollector), subtitle: lang.tr(AppLocalizations.kAchGemCollectorSub), emoji: '💎', unlocked: totalCompleted >= 50),
+        _AchievementCard(title: lang.tr(AppLocalizations.kAchUnstoppable), subtitle: lang.tr(AppLocalizations.kAchUnstoppableSub), emoji: '👑', unlocked: bestStreak >= 30),
       ],
     );
   }
@@ -335,7 +285,6 @@ class _ActivityData {
 class _MiniStat extends StatelessWidget {
   final String label;
   final String value;
-
   const _MiniStat({required this.label, required this.value});
 
   @override
@@ -343,22 +292,9 @@ class _MiniStat extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.textP,
-            ),
-          ),
+          Text(value, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: context.textP)),
           const SizedBox(height: 2),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: context.textS,
-            ),
-          ),
+          Text(label, style: GoogleFonts.inter(fontSize: 11, color: context.textS)),
         ],
       ),
     );
@@ -369,12 +305,7 @@ class _ActivityItem extends StatelessWidget {
   final String text;
   final String time;
   final String icon;
-
-  const _ActivityItem({
-    required this.text,
-    required this.time,
-    required this.icon,
-  });
+  const _ActivityItem({required this.text, required this.time, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -395,7 +326,8 @@ class _ActivityItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(text, style: AppTextStyles.body.copyWith(color: context.textP)),
-                Text(time, style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
+                if (time.isNotEmpty)
+                  Text(time, style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
               ],
             ),
           ),
@@ -410,13 +342,7 @@ class _AchievementCard extends StatelessWidget {
   final String subtitle;
   final String emoji;
   final bool unlocked;
-
-  const _AchievementCard({
-    required this.title,
-    required this.subtitle,
-    required this.emoji,
-    this.unlocked = false,
-  });
+  const _AchievementCard({required this.title, required this.subtitle, required this.emoji, this.unlocked = false});
 
   @override
   Widget build(BuildContext context) {
@@ -426,16 +352,11 @@ class _AchievementCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: unlocked ? context.card : context.bg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: unlocked ? AppColors.green.withValues(alpha: 0.3) : context.border,
-        ),
+        border: Border.all(color: unlocked ? AppColors.green.withValues(alpha: 0.3) : context.border),
       ),
       child: Row(
         children: [
-          Opacity(
-            opacity: unlocked ? 1.0 : 0.3,
-            child: Text(emoji, style: const TextStyle(fontSize: 28)),
-          ),
+          Opacity(opacity: unlocked ? 1.0 : 0.3, child: Text(emoji, style: const TextStyle(fontSize: 28))),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -449,8 +370,7 @@ class _AchievementCard extends StatelessWidget {
           if (unlocked)
             const Icon(Icons.check_circle, color: AppColors.green, size: 22)
           else
-            Icon(Icons.lock_outline,
-                color: context.textH, size: 20),
+            Icon(Icons.lock_outline, color: context.textH, size: 20),
         ],
       ),
     );

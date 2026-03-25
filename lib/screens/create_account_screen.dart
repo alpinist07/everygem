@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
 import '../constants/routes.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/habit_provider.dart';
 
@@ -28,15 +30,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   // Step 3: Initial habits
   final Set<String> _selectedHabits = {};
 
-  final List<Map<String, String>> _habitOptions = [
-    {'emoji': '💧', 'name': 'Drink water'},
-    {'emoji': '🏃', 'name': 'Run'},
-    {'emoji': '📚', 'name': 'Read books'},
-    {'emoji': '🧘', 'name': 'Meditate'},
-    {'emoji': '👨‍💻', 'name': 'Study'},
-    {'emoji': '📕', 'name': 'Journal'},
-    {'emoji': '🌿', 'name': 'Plants'},
-    {'emoji': '🥳', 'name': 'Socialize'},
+  static const _habitOptionKeys = [
+    {'emoji': '💧', 'key': AppLocalizations.kHabitDrinkWater},
+    {'emoji': '🏃', 'key': AppLocalizations.kHabitRun},
+    {'emoji': '📚', 'key': AppLocalizations.kHabitReadBooks},
+    {'emoji': '🧘', 'key': AppLocalizations.kHabitMeditate},
+    {'emoji': '👨‍💻', 'key': AppLocalizations.kHabitStudy},
+    {'emoji': '📕', 'key': AppLocalizations.kHabitJournal},
+    {'emoji': '🌿', 'key': AppLocalizations.kHabitPlants},
+    {'emoji': '🥳', 'key': AppLocalizations.kHabitSocialize},
   ];
 
   @override
@@ -49,9 +51,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   void _nextStep() {
+    final lang = context.read<LanguageProvider>();
     if (_currentStep == 0 && _nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your name')),
+        SnackBar(content: Text(lang.tr(AppLocalizations.kPleaseEnterName))),
       );
       return;
     }
@@ -68,6 +71,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Future<void> _createAccount() async {
     final userProvider = context.read<UserProvider>();
     final habitProvider = context.read<HabitProvider>();
+    final lang = context.read<LanguageProvider>();
 
     await userProvider.createUser(
       name: _nameController.text.trim(),
@@ -79,11 +83,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     // Add selected initial habits
     final colors = AppColors.habitColors;
     int colorIndex = 0;
-    for (final habitName in _selectedHabits) {
-      final option =
-          _habitOptions.firstWhere((o) => o['name'] == habitName);
+    for (final key in _selectedHabits) {
+      final option = _habitOptionKeys.firstWhere((o) => o['key'] == key);
       await habitProvider.addHabit(
-        name: option['name']!,
+        name: lang.tr(option['key']!),
         emoji: option['emoji']!,
         color: colors[colorIndex % colors.length],
       );
@@ -96,6 +99,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -113,7 +118,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 },
               )
             : null,
-        title: Text('Create Account', style: AppTextStyles.heading3),
+        title: Text(lang.tr(AppLocalizations.kCreateAccount), style: AppTextStyles.heading3),
         centerTitle: true,
       ),
       body: Column(
@@ -126,9 +131,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 setState(() => _currentStep = index);
               },
               children: [
-                _buildNameStep(),
-                _buildGenderStep(),
-                _buildHabitsStep(),
+                _buildNameStep(lang),
+                _buildGenderStep(lang),
+                _buildHabitsStep(lang),
               ],
             ),
           ),
@@ -149,7 +154,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  _currentStep == 2 ? 'Get Started' : 'Next',
+                  _currentStep == 2
+                      ? lang.tr(AppLocalizations.kGetStarted)
+                      : lang.tr(AppLocalizations.kNext),
                   style: AppTextStyles.button,
                 ),
               ),
@@ -160,40 +167,40 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget _buildNameStep() {
+  Widget _buildNameStep(LanguageProvider lang) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          _buildLabel('NAME'),
-          _buildTextField(_nameController, 'Enter your name'),
+          _buildLabel(lang.tr(AppLocalizations.kName)),
+          _buildTextField(_nameController, lang.tr(AppLocalizations.kEnterName)),
           const SizedBox(height: 20),
-          _buildLabel('SURNAME'),
-          _buildTextField(_surnameController, 'Enter your surname'),
+          _buildLabel(lang.tr(AppLocalizations.kSurname)),
+          _buildTextField(_surnameController, lang.tr(AppLocalizations.kEnterSurname)),
           const SizedBox(height: 20),
-          _buildLabel('BIRTHDATE'),
-          _buildTextField(_birthdateController, 'mm/dd/yyyy'),
+          _buildLabel(lang.tr(AppLocalizations.kBirthdate)),
+          _buildTextField(_birthdateController, lang.tr(AppLocalizations.kBirthdateHint)),
         ],
       ),
     );
   }
 
-  Widget _buildGenderStep() {
+  Widget _buildGenderStep(LanguageProvider lang) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          Text('Choose your gender', style: AppTextStyles.subtitle),
+          Text(lang.tr(AppLocalizations.kChooseGender), style: AppTextStyles.subtitle),
           const SizedBox(height: 24),
           Row(
             children: [
-              _buildGenderOption('Male', '🧑'),
+              _buildGenderOption(lang.tr(AppLocalizations.kMale), '🧑'),
               const SizedBox(width: 16),
-              _buildGenderOption('Female', '👩'),
+              _buildGenderOption(lang.tr(AppLocalizations.kFemale), '👩'),
             ],
           ),
         ],
@@ -201,17 +208,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget _buildHabitsStep() {
+  Widget _buildHabitsStep(LanguageProvider lang) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          Text('Choose your first habits', style: AppTextStyles.subtitle),
+          Text(lang.tr(AppLocalizations.kChooseFirstHabits), style: AppTextStyles.subtitle),
           const SizedBox(height: 4),
           Text(
-            'You may add more habits later',
+            lang.tr(AppLocalizations.kAddMoreLater),
             style: AppTextStyles.bodySmall,
           ),
           const SizedBox(height: 24),
@@ -223,14 +230,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 crossAxisSpacing: 12,
                 childAspectRatio: 1.3,
               ),
-              itemCount: _habitOptions.length,
+              itemCount: _habitOptionKeys.length,
               itemBuilder: (context, index) {
-                final option = _habitOptions[index];
-                final isSelected =
-                    _selectedHabits.contains(option['name']);
+                final option = _habitOptionKeys[index];
+                final key = option['key']!;
+                final isSelected = _selectedHabits.contains(key);
                 return _buildHabitOption(
                   option['emoji']!,
-                  option['name']!,
+                  lang.tr(key),
+                  key,
                   isSelected,
                 );
               },
@@ -302,14 +310,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget _buildHabitOption(String emoji, String name, bool isSelected) {
+  Widget _buildHabitOption(String emoji, String name, String key, bool isSelected) {
     return GestureDetector(
       onTap: () {
         setState(() {
           if (isSelected) {
-            _selectedHabits.remove(name);
+            _selectedHabits.remove(key);
           } else {
-            _selectedHabits.add(name);
+            _selectedHabits.add(key);
           }
         });
       },

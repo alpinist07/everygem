@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../constants/colors.dart';
 import '../constants/routes.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -15,25 +18,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pageController = PageController();
   int _currentPage = 0;
 
-  final _pages = const [
+  List<_OnboardingData> _pages(LanguageProvider lang) => [
     _OnboardingData(
-      title: 'Create\nGood Habits',
-      subtitle:
-          'Change your life by slowly adding new healthy habits and sticking to them.',
+      title: lang.tr(AppLocalizations.kOnboarding1Title),
+      subtitle: lang.tr(AppLocalizations.kOnboarding1Subtitle),
       emoji: '✨',
       illustrationEmojis: ['🏃‍♂️', '📚', '🧘', '💧'],
     ),
     _OnboardingData(
-      title: 'Track\nYour Progress',
-      subtitle:
-          'Everyday you become one step closer to your goal. Don\'t give up!',
+      title: lang.tr(AppLocalizations.kOnboarding2Title),
+      subtitle: lang.tr(AppLocalizations.kOnboarding2Subtitle),
       emoji: '📊',
       illustrationEmojis: ['💧', '🚶', '🧘‍♀️', '🌱'],
     ),
     _OnboardingData(
-      title: 'Stay Together\nand Strong',
-      subtitle:
-          'Find friends to discuss common topics. Complete challenges together.',
+      title: lang.tr(AppLocalizations.kOnboarding3Title),
+      subtitle: lang.tr(AppLocalizations.kOnboarding3Subtitle),
       emoji: '🤝',
       illustrationEmojis: ['🏆', '⭐', '🎯', '💪'],
     ),
@@ -45,8 +45,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _onNext() {
-    if (_currentPage < _pages.length - 1) {
+  void _onNext(int pageCount) {
+    if (_currentPage < pageCount - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -62,6 +62,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
+    final pages = _pages(lang);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.splashGradient),
@@ -74,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: TextButton(
                   onPressed: _onSkip,
                   child: Text(
-                    'Skip',
+                    lang.tr(AppLocalizations.kSkip),
                     style: GoogleFonts.inter(
                       color: Colors.white70,
                       fontSize: 16,
@@ -87,12 +90,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: _pages.length,
+                  itemCount: pages.length,
                   onPageChanged: (index) {
                     setState(() => _currentPage = index);
                   },
                   itemBuilder: (context, index) {
-                    final page = _pages[index];
+                    final page = pages[index];
                     return _OnboardingPage(data: page);
                   },
                 ),
@@ -102,7 +105,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.only(bottom: 24),
                 child: SmoothPageIndicator(
                   controller: _pageController,
-                  count: _pages.length,
+                  count: pages.length,
                   effect: const WormEffect(
                     dotWidth: 10,
                     dotHeight: 10,
@@ -120,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _onNext,
+                    onPressed: () => _onNext(pages.length),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: AppColors.primary,
@@ -130,9 +133,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       elevation: 0,
                     ),
                     child: Text(
-                      _currentPage == _pages.length - 1
-                          ? 'Get Started'
-                          : 'Continue',
+                      _currentPage == pages.length - 1
+                          ? lang.tr(AppLocalizations.kGetStarted)
+                          : lang.tr(AppLocalizations.kContinue),
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

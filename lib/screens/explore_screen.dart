@@ -3,37 +3,39 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/habit_provider.dart';
 
 class _SuggestedHabit {
   final String emoji;
-  final String name;
-  final String detail;
+  final String nameKey;
+  final String detailKey;
   final Color bgColor;
   final Color habitColor;
 
   const _SuggestedHabit({
     required this.emoji,
-    required this.name,
-    required this.detail,
+    required this.nameKey,
+    required this.detailKey,
     required this.bgColor,
     required this.habitColor,
   });
 }
 
 const _allSuggestions = <_SuggestedHabit>[
-  _SuggestedHabit(emoji: '💧', name: 'Drink Water', detail: '8 glasses', bgColor: Color(0xFFE8F4FD), habitColor: Color(0xFF3B82F6)),
-  _SuggestedHabit(emoji: '🏃', name: 'Walk', detail: '10,000 steps', bgColor: Color(0xFFFDE8E8), habitColor: Color(0xFFEF4444)),
-  _SuggestedHabit(emoji: '🏊', name: 'Swim', detail: '30 min', bgColor: Color(0xFFE8E8FD), habitColor: Color(0xFF4B3FF5)),
-  _SuggestedHabit(emoji: '📕', name: 'Read', detail: '20 min', bgColor: Color(0xFFFDEFE8), habitColor: Color(0xFFF5A623)),
-  _SuggestedHabit(emoji: '🧘', name: 'Meditate', detail: '10 min', bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E)),
-  _SuggestedHabit(emoji: '💪', name: 'Exercise', detail: '30 min', bgColor: Color(0xFFFDE8F4), habitColor: Color(0xFFEC4899)),
-  _SuggestedHabit(emoji: '😴', name: 'Sleep Early', detail: 'Before 11pm', bgColor: Color(0xFFF0E8FD), habitColor: Color(0xFF8B5CF6)),
-  _SuggestedHabit(emoji: '📝', name: 'Journal', detail: '5 min', bgColor: Color(0xFFFDFDE8), habitColor: Color(0xFFF5A623)),
-  _SuggestedHabit(emoji: '🍎', name: 'Eat Fruits', detail: '2 servings', bgColor: Color(0xFFE8FDF0), habitColor: Color(0xFF22C55E)),
-  _SuggestedHabit(emoji: '🧹', name: 'Clean Up', detail: '15 min', bgColor: Color(0xFFE8F0FD), habitColor: Color(0xFF14B8A6)),
-  _SuggestedHabit(emoji: '🎵', name: 'Practice Music', detail: '20 min', bgColor: Color(0xFFFDE8EF), habitColor: Color(0xFFEC4899)),
-  _SuggestedHabit(emoji: '🌿', name: 'Go Outside', detail: '30 min', bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E)),
+  _SuggestedHabit(emoji: '💧', nameKey: AppLocalizations.kSugDrinkWater, detailKey: AppLocalizations.kSugDetail8Glasses, bgColor: Color(0xFFE8F4FD), habitColor: Color(0xFF3B82F6)),
+  _SuggestedHabit(emoji: '🏃', nameKey: AppLocalizations.kSugWalk, detailKey: AppLocalizations.kSugDetail10kSteps, bgColor: Color(0xFFFDE8E8), habitColor: Color(0xFFEF4444)),
+  _SuggestedHabit(emoji: '🏊', nameKey: AppLocalizations.kSugSwim, detailKey: AppLocalizations.kSugDetail30min, bgColor: Color(0xFFE8E8FD), habitColor: Color(0xFF4B3FF5)),
+  _SuggestedHabit(emoji: '📕', nameKey: AppLocalizations.kSugRead, detailKey: AppLocalizations.kSugDetail20min, bgColor: Color(0xFFFDEFE8), habitColor: Color(0xFFF5A623)),
+  _SuggestedHabit(emoji: '🧘', nameKey: AppLocalizations.kSugMeditate, detailKey: AppLocalizations.kSugDetail10min, bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E)),
+  _SuggestedHabit(emoji: '💪', nameKey: AppLocalizations.kSugExercise, detailKey: AppLocalizations.kSugDetail30min, bgColor: Color(0xFFFDE8F4), habitColor: Color(0xFFEC4899)),
+  _SuggestedHabit(emoji: '😴', nameKey: AppLocalizations.kSugSleepEarly, detailKey: AppLocalizations.kSugDetailBefore11, bgColor: Color(0xFFF0E8FD), habitColor: Color(0xFF8B5CF6)),
+  _SuggestedHabit(emoji: '📝', nameKey: AppLocalizations.kSugJournal, detailKey: AppLocalizations.kSugDetail5min, bgColor: Color(0xFFFDFDE8), habitColor: Color(0xFFF5A623)),
+  _SuggestedHabit(emoji: '🍎', nameKey: AppLocalizations.kSugEatFruits, detailKey: AppLocalizations.kSugDetail2Servings, bgColor: Color(0xFFE8FDF0), habitColor: Color(0xFF22C55E)),
+  _SuggestedHabit(emoji: '🧹', nameKey: AppLocalizations.kSugCleanUp, detailKey: AppLocalizations.kSugDetail15min, bgColor: Color(0xFFE8F0FD), habitColor: Color(0xFF14B8A6)),
+  _SuggestedHabit(emoji: '🎵', nameKey: AppLocalizations.kSugPracticeMusic, detailKey: AppLocalizations.kSugDetail20min, bgColor: Color(0xFFFDE8EF), habitColor: Color(0xFFEC4899)),
+  _SuggestedHabit(emoji: '🌿', nameKey: AppLocalizations.kSugGoOutside, detailKey: AppLocalizations.kSugDetail30min, bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E)),
 ];
 
 class ExploreScreen extends StatefulWidget {
@@ -45,38 +47,37 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   String _searchQuery = '';
-  String _selectedCategory = 'All';
-  final _categories = ['All', 'Health', 'Fitness', 'Mind', 'Lifestyle'];
+  String _selectedCategoryKey = AppLocalizations.kAll;
 
-  List<_SuggestedHabit> get _filteredSuggestions {
+  List<_SuggestedHabit> _filteredSuggestions(LanguageProvider lang) {
     final habitProvider = context.read<HabitProvider>();
     final existingNames =
         habitProvider.habits.map((h) => h.name.toLowerCase()).toSet();
 
     var list = _allSuggestions
-        .where((s) => !existingNames.contains(s.name.toLowerCase()))
+        .where((s) => !existingNames.contains(lang.tr(s.nameKey).toLowerCase()))
         .toList();
 
     if (_searchQuery.isNotEmpty) {
       list = list
           .where((s) =>
-              s.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+              lang.tr(s.nameKey).toLowerCase().contains(_searchQuery.toLowerCase()))
           .toList();
     }
 
     return list;
   }
 
-  Future<void> _addSuggested(_SuggestedHabit suggestion) async {
+  Future<void> _addSuggested(_SuggestedHabit suggestion, LanguageProvider lang) async {
     await context.read<HabitProvider>().addHabit(
-          name: suggestion.name,
+          name: lang.tr(suggestion.nameKey),
           emoji: suggestion.emoji,
           color: suggestion.habitColor,
         );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${suggestion.emoji} ${suggestion.name} added!'),
+        content: Text('${suggestion.emoji} ${lang.tr(suggestion.nameKey)} ${lang.tr(AppLocalizations.kAdded)}'),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
@@ -87,8 +88,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     context.watch<HabitProvider>();
-    final suggestions = _filteredSuggestions;
+    final suggestions = _filteredSuggestions(lang);
+
+    final categoryKeys = [
+      AppLocalizations.kAll, AppLocalizations.kHealth,
+      AppLocalizations.kFitness, AppLocalizations.kMind,
+      AppLocalizations.kLifestyle,
+    ];
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -99,7 +107,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              Text('Explore', style: AppTextStyles.heading2.copyWith(color: context.textP)),
+              Text(lang.tr(AppLocalizations.kExplore), style: AppTextStyles.heading2.copyWith(color: context.textP)),
               const SizedBox(height: 16),
 
               // Search bar
@@ -107,11 +115,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 onChanged: (v) => setState(() => _searchQuery = v),
                 style: AppTextStyles.body.copyWith(color: context.textP),
                 decoration: InputDecoration(
-                  hintText: 'Search habits...',
-                  hintStyle:
-                      AppTextStyles.body.copyWith(color: context.textH),
-                  prefixIcon: Icon(Icons.search,
-                      color: context.textS, size: 20),
+                  hintText: lang.tr(AppLocalizations.kSearchHabits),
+                  hintStyle: AppTextStyles.body.copyWith(color: context.textH),
+                  prefixIcon: Icon(Icons.search, color: context.textS, size: 20),
                   filled: true,
                   fillColor: context.card,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -125,8 +131,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: AppColors.primary, width: 2),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
                   ),
                 ),
               ),
@@ -137,33 +142,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 height: 36,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _categories.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemCount: categoryKeys.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (_, i) {
-                    final isActive = _categories[i] == _selectedCategory;
+                    final isActive = categoryKeys[i] == _selectedCategoryKey;
                     return GestureDetector(
-                      onTap: () =>
-                          setState(() => _selectedCategory = _categories[i]),
+                      onTap: () => setState(() => _selectedCategoryKey = categoryKeys[i]),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
                           color: isActive ? AppColors.primary : context.card,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
-                            color: isActive
-                                ? AppColors.primary
-                                : context.border,
+                            color: isActive ? AppColors.primary : context.border,
                           ),
                         ),
                         child: Center(
                           child: Text(
-                            _categories[i],
+                            lang.tr(categoryKeys[i]),
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: isActive
-                                  ? Colors.white
-                                  : context.textS,
+                              color: isActive ? Colors.white : context.textS,
                             ),
                           ),
                         ),
@@ -175,7 +175,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               const SizedBox(height: 24),
 
               // Suggested habits
-              _SectionHeader(title: 'Suggested for You'),
+              _SectionHeader(title: lang.tr(AppLocalizations.kSuggestedForYou)),
               const SizedBox(height: 12),
               if (suggestions.isEmpty)
                 Container(
@@ -189,8 +189,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: Center(
                     child: Text(
                       _searchQuery.isNotEmpty
-                          ? 'No matching habits found'
-                          : 'You\'ve added all suggested habits!',
+                          ? lang.tr(AppLocalizations.kNoMatchingHabits)
+                          : lang.tr(AppLocalizations.kAllSuggestedAdded),
                       style: AppTextStyles.bodySmall,
                     ),
                   ),
@@ -201,17 +201,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: suggestions.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 12),
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
                     itemBuilder: (_, i) => _SuggestedCard(
                       suggestion: suggestions[i],
-                      onAdd: () => _addSuggested(suggestions[i]),
+                      lang: lang,
+                      onAdd: () => _addSuggested(suggestions[i], lang),
                     ),
                   ),
                 ),
               const SizedBox(height: 24),
 
               // Quick add grid
-              _SectionHeader(title: 'Quick Add'),
+              _SectionHeader(title: lang.tr(AppLocalizations.kQuickAdd)),
               const SizedBox(height: 12),
               GridView.count(
                 crossAxisCount: 4,
@@ -221,7 +222,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 crossAxisSpacing: 12,
                 children: suggestions.take(8).map((s) {
                   return GestureDetector(
-                    onTap: () => _addSuggested(s),
+                    onTap: () => _addSuggested(s, lang),
                     child: Container(
                       decoration: BoxDecoration(
                         color: context.card,
@@ -231,15 +232,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(s.emoji,
-                              style: const TextStyle(fontSize: 24)),
+                          Text(s.emoji, style: const TextStyle(fontSize: 24)),
                           const SizedBox(height: 4),
                           Text(
-                            s.name,
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            lang.tr(s.nameKey),
+                            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -252,28 +249,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
               const SizedBox(height: 24),
 
               // Challenges
-              _SectionHeader(title: 'Challenges'),
+              _SectionHeader(title: lang.tr(AppLocalizations.kChallenges)),
               const SizedBox(height: 12),
               SizedBox(
                 height: 120,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children: const [
+                  children: [
                     _ChallengeCard(
-                      title: '7 Day Streak',
-                      subtitle: 'Complete any habit for 7 days straight',
+                      title: lang.tr(AppLocalizations.kChallenge7Day),
+                      subtitle: lang.tr(AppLocalizations.kChallenge7DaySub),
                       emoji: '🔥',
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     _ChallengeCard(
-                      title: 'Early Bird',
-                      subtitle: 'Complete all habits before noon',
+                      title: lang.tr(AppLocalizations.kChallengeEarlyBird),
+                      subtitle: lang.tr(AppLocalizations.kChallengeEarlyBirdSub),
                       emoji: '🌅',
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     _ChallengeCard(
-                      title: 'Perfect Week',
-                      subtitle: 'Complete all habits every day this week',
+                      title: lang.tr(AppLocalizations.kChallengePerfectWeek),
+                      subtitle: lang.tr(AppLocalizations.kChallengePerfectWeekSub),
                       emoji: '⭐',
                     ),
                   ],
@@ -282,19 +279,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
               const SizedBox(height: 24),
 
               // Tips
-              _SectionHeader(title: 'Tips & Motivation'),
+              _SectionHeader(title: lang.tr(AppLocalizations.kTipsMotivation)),
               const SizedBox(height: 12),
               _TipCard(
-                title: 'Start small, grow big',
-                body:
-                    'Begin with just 2 minutes a day. Consistency beats intensity.',
+                title: lang.tr(AppLocalizations.kTipStartSmall),
+                body: lang.tr(AppLocalizations.kTipStartSmallBody),
                 emoji: '🌱',
               ),
               const SizedBox(height: 12),
               _TipCard(
-                title: 'Stack your habits',
-                body:
-                    'Attach a new habit to an existing one. "After I brush my teeth, I will meditate."',
+                title: lang.tr(AppLocalizations.kTipStackHabits),
+                body: lang.tr(AppLocalizations.kTipStackHabitsBody),
                 emoji: '📚',
               ),
               const SizedBox(height: 80),
@@ -318,10 +313,12 @@ class _SectionHeader extends StatelessWidget {
 
 class _SuggestedCard extends StatelessWidget {
   final _SuggestedHabit suggestion;
+  final LanguageProvider lang;
   final VoidCallback onAdd;
 
   const _SuggestedCard({
     required this.suggestion,
+    required this.lang,
     required this.onAdd,
   });
 
@@ -340,8 +337,7 @@ class _SuggestedCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(suggestion.emoji,
-                  style: const TextStyle(fontSize: 24)),
+              Text(suggestion.emoji, style: const TextStyle(fontSize: 24)),
               GestureDetector(
                 onTap: onAdd,
                 child: Container(
@@ -358,13 +354,10 @@ class _SuggestedCard extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            suggestion.name,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            lang.tr(suggestion.nameKey),
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
-          Text(suggestion.detail, style: AppTextStyles.bodySmall),
+          Text(lang.tr(suggestion.detailKey), style: AppTextStyles.bodySmall),
         ],
       ),
     );

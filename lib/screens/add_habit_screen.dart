@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
 
@@ -26,8 +28,6 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '🎵', '🍎', '😴', '🧹', '💊', '🚶', '🧠', '☀️',
   ];
 
-  final List<String> _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
   @override
   void initState() {
     super.initState();
@@ -46,9 +46,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   Future<void> _save() async {
+    final lang = context.read<LanguageProvider>();
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a habit name')),
+        SnackBar(content: Text(lang.tr(AppLocalizations.kPleaseEnterHabitName))),
       );
       return;
     }
@@ -80,6 +81,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
+    final dayLabels = [
+      lang.tr(AppLocalizations.kMon), lang.tr(AppLocalizations.kTue),
+      lang.tr(AppLocalizations.kWed), lang.tr(AppLocalizations.kThu),
+      lang.tr(AppLocalizations.kFri), lang.tr(AppLocalizations.kSat),
+      lang.tr(AppLocalizations.kSun),
+    ];
+
     return Scaffold(
       backgroundColor: context.bg,
       appBar: AppBar(
@@ -89,7 +98,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           icon: Icon(Icons.chevron_left, color: context.textP),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(widget.habit != null ? 'Edit Habit' : 'Create Custom Habit',
+        title: Text(
+            widget.habit != null
+                ? lang.tr(AppLocalizations.kEditHabit)
+                : lang.tr(AppLocalizations.kCreateCustomHabit),
             style: AppTextStyles.heading3.copyWith(color: context.textP)),
         centerTitle: true,
       ),
@@ -103,9 +115,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               controller: _nameController,
               style: AppTextStyles.body.copyWith(color: context.textP),
               decoration: InputDecoration(
-                hintText: 'Habit name',
-                hintStyle:
-                    AppTextStyles.body.copyWith(color: context.textH),
+                hintText: lang.tr(AppLocalizations.kHabitName),
+                hintStyle: AppTextStyles.body.copyWith(color: context.textH),
                 filled: true,
                 fillColor: context.card,
                 border: OutlineInputBorder(
@@ -118,15 +129,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      const BorderSide(color: AppColors.primary, width: 2),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
             // Icon selection
-            Text('CHOOSE AN ICON', style: AppTextStyles.label.copyWith(color: context.textS)),
+            Text(lang.tr(AppLocalizations.kChooseIcon), style: AppTextStyles.label.copyWith(color: context.textS)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
@@ -144,15 +154,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           : context.card,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected
-                            ? AppColors.primary
-                            : context.border,
+                        color: isSelected ? AppColors.primary : context.border,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
                     child: Center(
-                      child: Text(emoji,
-                          style: const TextStyle(fontSize: 22)),
+                      child: Text(emoji, style: const TextStyle(fontSize: 22)),
                     ),
                   ),
                 );
@@ -161,7 +168,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             const SizedBox(height: 24),
 
             // Color selection
-            Text('CHOOSE A COLOR', style: AppTextStyles.label.copyWith(color: context.textS)),
+            Text(lang.tr(AppLocalizations.kChooseColor), style: AppTextStyles.label.copyWith(color: context.textS)),
             const SizedBox(height: 12),
             Row(
               children: AppColors.habitColors.map((color) {
@@ -180,8 +187,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           : null,
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check,
-                            color: Colors.white, size: 18)
+                        ? const Icon(Icons.check, color: Colors.white, size: 18)
                         : null,
                   ),
                 );
@@ -190,7 +196,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             const SizedBox(height: 24),
 
             // Active days
-            Text('REPEAT ON', style: AppTextStyles.label.copyWith(color: context.textS)),
+            Text(lang.tr(AppLocalizations.kRepeatOn), style: AppTextStyles.label.copyWith(color: context.textS)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -214,14 +220,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                       color: isActive ? AppColors.primary : context.card,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: isActive
-                            ? AppColors.primary
-                            : context.border,
+                        color: isActive ? AppColors.primary : context.border,
                       ),
                     ),
                     child: Center(
                       child: Text(
-                        _dayLabels[index],
+                        dayLabels[index],
                         style: AppTextStyles.body.copyWith(
                           color: isActive ? Colors.white : context.textP,
                           fontWeight: FontWeight.w600,
@@ -235,7 +239,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             const SizedBox(height: 24),
 
             // Reminder
-            Text('ADD REMINDER', style: AppTextStyles.label.copyWith(color: context.textS)),
+            Text(lang.tr(AppLocalizations.kAddReminder), style: AppTextStyles.label.copyWith(color: context.textS)),
             const SizedBox(height: 12),
             GestureDetector(
               onTap: () async {
@@ -257,17 +261,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.access_time,
-                        color: context.textS, size: 20),
+                    Icon(Icons.access_time, color: context.textS, size: 20),
                     const SizedBox(width: 12),
                     Text(
                       _reminderTime != null
                           ? _reminderTime!.format(context)
-                          : 'Set reminder time',
+                          : lang.tr(AppLocalizations.kSetReminderTime),
                       style: AppTextStyles.body.copyWith(
-                        color: _reminderTime != null
-                            ? context.textP
-                            : context.textH,
+                        color: _reminderTime != null ? context.textP : context.textH,
                       ),
                     ),
                   ],
@@ -290,7 +291,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: Text(widget.habit != null ? 'Save Changes' : 'Add Habit', style: AppTextStyles.button),
+                child: Text(
+                    widget.habit != null
+                        ? lang.tr(AppLocalizations.kSaveChanges)
+                        : lang.tr(AppLocalizations.kAddHabit),
+                    style: AppTextStyles.button),
               ),
             ),
           ],

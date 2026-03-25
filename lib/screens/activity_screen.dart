@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 import 'stats_detail_screen.dart';
@@ -18,7 +19,6 @@ class ActivityScreen extends StatefulWidget {
 
 class _ActivityScreenState extends State<ActivityScreen> {
   int _selectedTab = 1; // 0=Daily, 1=Weekly, 2=Monthly
-  final _tabs = ['Daily', 'Weekly', 'Monthly'];
 
   Map<String, int> _getStats(List<Habit> habits) {
     final now = DateTime.now();
@@ -88,10 +88,23 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final habitProvider = context.watch<HabitProvider>();
     final habits = habitProvider.habits;
     final stats = _getStats(habits);
     final weeklyRates = _getWeeklyRates(habits);
+
+    final tabLabels = [
+      lang.tr(AppLocalizations.kDaily),
+      lang.tr(AppLocalizations.kWeekly),
+      lang.tr(AppLocalizations.kMonthly),
+    ];
+    final dayLabels = [
+      lang.tr(AppLocalizations.kMon), lang.tr(AppLocalizations.kTue),
+      lang.tr(AppLocalizations.kWed), lang.tr(AppLocalizations.kThu),
+      lang.tr(AppLocalizations.kFri), lang.tr(AppLocalizations.kSat),
+      lang.tr(AppLocalizations.kSun),
+    ];
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -105,7 +118,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Activity', style: AppTextStyles.heading2.copyWith(color: context.textP)),
+                  Text(lang.tr(AppLocalizations.kActivity), style: AppTextStyles.heading2.copyWith(color: context.textP)),
                   GestureDetector(
                     onTap: () => Navigator.push(
                       context,
@@ -117,7 +130,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text('Details',
+                      child: Text(lang.tr(AppLocalizations.kDetails),
                           style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -137,7 +150,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
                 padding: const EdgeInsets.all(4),
                 child: Row(
-                  children: List.generate(_tabs.length, (i) {
+                  children: List.generate(tabLabels.length, (i) {
                     final isActive = i == _selectedTab;
                     return Expanded(
                       child: GestureDetector(
@@ -145,20 +158,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.primary
-                                : Colors.transparent,
+                            color: isActive ? AppColors.primary : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text(
-                              _tabs[i],
+                              tabLabels[i],
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: isActive
-                                    ? Colors.white
-                                    : context.textS,
+                                color: isActive ? Colors.white : context.textS,
                               ),
                             ),
                           ),
@@ -191,13 +200,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           children: [
                             Text(
                               _selectedTab == 0
-                                  ? 'Today'
+                                  ? lang.tr(AppLocalizations.kToday)
                                   : _selectedTab == 1
-                                      ? 'This Week'
-                                      : 'This Month',
+                                      ? lang.tr(AppLocalizations.kThisWeek)
+                                      : lang.tr(AppLocalizations.kThisMonth),
                               style: AppTextStyles.subtitle.copyWith(color: context.textP),
                             ),
-                            Text('Summary', style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
+                            Text(lang.tr(AppLocalizations.kSummary), style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
                           ],
                         ),
                       ],
@@ -205,9 +214,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     const SizedBox(height: 20),
                     Row(
                       children: [
-                        _StatItem(label: 'COMPLETED', value: '${stats['completed']}', color: context.textP),
-                        _StatItem(label: 'TOTAL', value: '${stats['total']}', color: AppColors.primary),
-                        _StatItem(label: 'RATE', value: '${stats['rate']}%', color: AppColors.green),
+                        _StatItem(label: lang.tr(AppLocalizations.kCompleted), value: '${stats['completed']}', color: context.textP),
+                        _StatItem(label: lang.tr(AppLocalizations.kTotal), value: '${stats['total']}', color: AppColors.primary),
+                        _StatItem(label: lang.tr(AppLocalizations.kRate), value: '${stats['rate']}%', color: AppColors.green),
                       ],
                     ),
                   ],
@@ -231,7 +240,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           Text('${habits.length}',
                               style: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white)),
                           const SizedBox(height: 4),
-                          Text('Active Habits', style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
+                          Text(lang.tr(AppLocalizations.kActiveHabits), style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
                         ],
                       ),
                     ),
@@ -242,7 +251,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           Text('${_getBestStreak(habits)}',
                               style: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white)),
                           const SizedBox(height: 4),
-                          Text('Best Streak', style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
+                          Text(lang.tr(AppLocalizations.kBestStreak), style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
                         ],
                       ),
                     ),
@@ -252,7 +261,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               const SizedBox(height: 24),
 
               // Weekly streak calendar
-              Text('This Week', style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+              Text(lang.tr(AppLocalizations.kThisWeek), style: AppTextStyles.subtitle.copyWith(color: context.textP)),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
@@ -272,7 +281,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     final isFuture = date.isAfter(now);
 
                     return _DayDot(
-                      label: DateFormat('E').format(date)[0],
+                      label: dayLabels[i],
                       dayNum: '${date.day}',
                       rate: weeklyRates[i],
                       isToday: isToday,
@@ -284,7 +293,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               const SizedBox(height: 24),
 
               // Per-habit breakdown
-              Text('Habit Details', style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+              Text(lang.tr(AppLocalizations.kHabitDetails), style: AppTextStyles.subtitle.copyWith(color: context.textP)),
               const SizedBox(height: 12),
               if (habits.isEmpty)
                 Container(
@@ -296,11 +305,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     border: Border.all(color: context.border),
                   ),
                   child: Center(
-                    child: Text('No habits yet', style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
+                    child: Text(lang.tr(AppLocalizations.kNoHabitsYet), style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
                   ),
                 )
               else
-                ...habits.map((habit) => _HabitDetailCard(habit: habit)),
+                ...habits.map((habit) => _HabitDetailCard(habit: habit, lang: lang)),
 
               const SizedBox(height: 80),
             ],
@@ -396,8 +405,9 @@ class _DayDot extends StatelessWidget {
 
 class _HabitDetailCard extends StatelessWidget {
   final Habit habit;
+  final LanguageProvider lang;
 
-  const _HabitDetailCard({required this.habit});
+  const _HabitDetailCard({required this.habit, required this.lang});
 
   int get _last7Completed {
     int count = 0;
@@ -454,7 +464,7 @@ class _HabitDetailCard extends StatelessWidget {
               children: [
                 Text(habit.name, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: context.textP)),
                 const SizedBox(height: 2),
-                Text('$completed/$active this week  •  ${habit.currentStreak} day streak',
+                Text('$completed/$active ${lang.tr(AppLocalizations.kThisWeekShort)}  •  ${habit.currentStreak} ${lang.tr(AppLocalizations.kDayStreak)}',
                     style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
               ],
             ),
