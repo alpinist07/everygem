@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
 import '../models/habit.dart';
+import '../providers/language_provider.dart';
 import '../widgets/heatmap_calendar.dart';
 
 class HabitStatsScreen extends StatelessWidget {
@@ -12,9 +15,17 @@ class HabitStatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final heatmapData = _buildHeatmapData();
-    final weekdayStats = _weekdayStats();
+    final weekdayRates = _weekdayRates();
     final totalDays = habit.completionLog.values.where((v) => v).length;
+
+    final dayLabels = [
+      lang.tr(AppLocalizations.kMon), lang.tr(AppLocalizations.kTue),
+      lang.tr(AppLocalizations.kWed), lang.tr(AppLocalizations.kThu),
+      lang.tr(AppLocalizations.kFri), lang.tr(AppLocalizations.kSat),
+      lang.tr(AppLocalizations.kSun),
+    ];
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -38,15 +49,17 @@ class HabitStatsScreen extends StatelessWidget {
             Row(
               children: [
                 _StatBox(
-                    label: 'Total Days', value: '$totalDays', color: AppColors.primary),
+                    label: lang.tr(AppLocalizations.kTotalDays),
+                    value: '$totalDays',
+                    color: AppColors.primary),
                 const SizedBox(width: 12),
                 _StatBox(
-                    label: 'Current Streak',
+                    label: lang.tr(AppLocalizations.kCurrentStreak),
                     value: '${habit.currentStreak}',
                     color: AppColors.green),
                 const SizedBox(width: 12),
                 _StatBox(
-                    label: 'Best Streak',
+                    label: lang.tr(AppLocalizations.kBestStreak),
                     value: '${_bestStreak()}',
                     color: AppColors.amber),
               ],
@@ -54,7 +67,8 @@ class HabitStatsScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Heatmap
-            Text('Activity', style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+            Text(lang.tr(AppLocalizations.kActivity),
+                style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
@@ -69,7 +83,7 @@ class HabitStatsScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Weekday breakdown
-            Text('By Day of Week',
+            Text(lang.tr(AppLocalizations.kByDayOfWeek),
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             Container(
@@ -81,56 +95,59 @@ class HabitStatsScreen extends StatelessWidget {
                 border: Border.all(color: context.border),
               ),
               child: Column(
-                children: weekdayStats.entries.map((e) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 32,
-                          child: Text(e.key,
-                              style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.textP)),
-                        ),
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: e.value,
-                              minHeight: 12,
-                              backgroundColor: context.bg,
-                              valueColor: AlwaysStoppedAnimation(
-                                e.value >= 0.8
-                                    ? AppColors.green
-                                    : e.value >= 0.5
-                                        ? AppColors.primary
-                                        : AppColors.amber,
+                children: [
+                  for (int d = 1; d <= 7; d++)
+                    if (weekdayRates.containsKey(d))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 32,
+                              child: Text(dayLabels[d - 1],
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: context.textP)),
+                            ),
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: weekdayRates[d]!,
+                                  minHeight: 12,
+                                  backgroundColor: context.bg,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    weekdayRates[d]! >= 0.8
+                                        ? AppColors.green
+                                        : weekdayRates[d]! >= 0.5
+                                            ? AppColors.primary
+                                            : AppColors.amber,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 36,
+                              child: Text(
+                                  '${(weekdayRates[d]! * 100).round()}%',
+                                  textAlign: TextAlign.right,
+                                  style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: context.textS)),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          width: 36,
-                          child: Text('${(e.value * 100).round()}%',
-                              textAlign: TextAlign.right,
-                              style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.textS)),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
 
             // Monthly completion rate
-            Text('Monthly Rate',
+            Text(lang.tr(AppLocalizations.kMonthlyRate),
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             Container(
@@ -220,12 +237,10 @@ class HabitStatsScreen extends StatelessWidget {
     return best;
   }
 
-  Map<String, double> _weekdayStats() {
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  /// Returns weekday (1=Mon … 7=Sun) → completion rate over last 12 weeks.
+  Map<int, double> _weekdayRates() {
     final counts = <int, int>{};
     final totals = <int, int>{};
-
-    // Count last 12 weeks
     final now = DateTime.now();
     for (int i = 0; i < 84; i++) {
       final date = now.subtract(Duration(days: i));
@@ -236,12 +251,11 @@ class HabitStatsScreen extends StatelessWidget {
         counts[wd] = (counts[wd] ?? 0) + 1;
       }
     }
-
-    final result = <String, double>{};
+    final result = <int, double>{};
     for (int d = 1; d <= 7; d++) {
       if (!habit.activeDays.contains(d)) continue;
       final total = totals[d] ?? 0;
-      result[dayNames[d - 1]] = total > 0 ? (counts[d] ?? 0) / total : 0;
+      result[d] = total > 0 ? (counts[d] ?? 0) / total : 0;
     }
     return result;
   }
@@ -264,7 +278,10 @@ class HabitStatsScreen extends StatelessWidget {
       for (int d = 1; d <= daysInMonth; d++) {
         final date = DateTime(year, m, d);
         if (date.isAfter(now)) break;
-        if (date.isBefore(habit.createdAt.subtract(const Duration(days: 1)))) continue;
+        if (date.isBefore(
+            habit.createdAt.subtract(const Duration(days: 1)))) {
+          continue;
+        }
         if (!habit.activeDays.contains(date.weekday)) continue;
         total++;
         if (habit.isCompletedOn(date)) completed++;
@@ -308,8 +325,7 @@ class _StatBox extends StatelessWidget {
                     fontSize: 24, fontWeight: FontWeight.w700, color: color)),
             const SizedBox(height: 4),
             Text(label,
-                style: GoogleFonts.inter(
-                    fontSize: 10, color: context.textS),
+                style: GoogleFonts.inter(fontSize: 10, color: context.textS),
                 textAlign: TextAlign.center),
           ],
         ),

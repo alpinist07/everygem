@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
 import '../providers/habit_provider.dart';
+import '../models/user.dart';
+import '../providers/user_provider.dart';
+
+// ─── Habit suggestion model ──────────────────────────────────────────────────
 
 class _SuggestedHabit {
   final String emoji;
@@ -14,29 +19,214 @@ class _SuggestedHabit {
   final Color bgColor;
   final Color habitColor;
 
+  /// Tags for personalization: roles, purposes, timeOfDay
+  final List<String> roles;      // role key constants or 'any'
+  final List<String> purposes;   // purpose key constants or 'any'
+  final String timeOfDay;        // 'morning', 'evening', 'any'
+
   const _SuggestedHabit({
     required this.emoji,
     required this.nameKey,
     required this.detailKey,
     required this.bgColor,
     required this.habitColor,
+    this.roles = const ['any'],
+    this.purposes = const ['any'],
+    this.timeOfDay = 'any',
   });
 }
 
 const _allSuggestions = <_SuggestedHabit>[
-  _SuggestedHabit(emoji: '💧', nameKey: AppLocalizations.kSugDrinkWater, detailKey: AppLocalizations.kSugDetail8Glasses, bgColor: Color(0xFFE8F4FD), habitColor: Color(0xFF3B82F6)),
-  _SuggestedHabit(emoji: '🏃', nameKey: AppLocalizations.kSugWalk, detailKey: AppLocalizations.kSugDetail10kSteps, bgColor: Color(0xFFFDE8E8), habitColor: Color(0xFFEF4444)),
-  _SuggestedHabit(emoji: '🏊', nameKey: AppLocalizations.kSugSwim, detailKey: AppLocalizations.kSugDetail30min, bgColor: Color(0xFFE8E8FD), habitColor: Color(0xFF4B3FF5)),
-  _SuggestedHabit(emoji: '📕', nameKey: AppLocalizations.kSugRead, detailKey: AppLocalizations.kSugDetail20min, bgColor: Color(0xFFFDEFE8), habitColor: Color(0xFFF5A623)),
-  _SuggestedHabit(emoji: '🧘', nameKey: AppLocalizations.kSugMeditate, detailKey: AppLocalizations.kSugDetail10min, bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E)),
-  _SuggestedHabit(emoji: '💪', nameKey: AppLocalizations.kSugExercise, detailKey: AppLocalizations.kSugDetail30min, bgColor: Color(0xFFFDE8F4), habitColor: Color(0xFFEC4899)),
-  _SuggestedHabit(emoji: '😴', nameKey: AppLocalizations.kSugSleepEarly, detailKey: AppLocalizations.kSugDetailBefore11, bgColor: Color(0xFFF0E8FD), habitColor: Color(0xFF8B5CF6)),
-  _SuggestedHabit(emoji: '📝', nameKey: AppLocalizations.kSugJournal, detailKey: AppLocalizations.kSugDetail5min, bgColor: Color(0xFFFDFDE8), habitColor: Color(0xFFF5A623)),
-  _SuggestedHabit(emoji: '🍎', nameKey: AppLocalizations.kSugEatFruits, detailKey: AppLocalizations.kSugDetail2Servings, bgColor: Color(0xFFE8FDF0), habitColor: Color(0xFF22C55E)),
-  _SuggestedHabit(emoji: '🧹', nameKey: AppLocalizations.kSugCleanUp, detailKey: AppLocalizations.kSugDetail15min, bgColor: Color(0xFFE8F0FD), habitColor: Color(0xFF14B8A6)),
-  _SuggestedHabit(emoji: '🎵', nameKey: AppLocalizations.kSugPracticeMusic, detailKey: AppLocalizations.kSugDetail20min, bgColor: Color(0xFFFDE8EF), habitColor: Color(0xFFEC4899)),
-  _SuggestedHabit(emoji: '🌿', nameKey: AppLocalizations.kSugGoOutside, detailKey: AppLocalizations.kSugDetail30min, bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E)),
+  // ── Universal
+  _SuggestedHabit(
+    emoji: '💧', nameKey: AppLocalizations.kSugDrinkWater,
+    detailKey: AppLocalizations.kSugDetail8Glasses,
+    bgColor: Color(0xFFE8F4FD), habitColor: Color(0xFF3B82F6),
+    purposes: ['purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '😴', nameKey: AppLocalizations.kSugSleepEarly,
+    detailKey: AppLocalizations.kSugDetailBefore11,
+    bgColor: Color(0xFFF0E8FD), habitColor: Color(0xFF8B5CF6),
+    purposes: ['purposeHealth', 'purposeMindfulness', 'any'],
+    timeOfDay: 'evening',
+  ),
+  _SuggestedHabit(
+    emoji: '🍎', nameKey: AppLocalizations.kSugEatFruits,
+    detailKey: AppLocalizations.kSugDetail2Servings,
+    bgColor: Color(0xFFE8FDF0), habitColor: Color(0xFF22C55E),
+    purposes: ['purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '💊', nameKey: AppLocalizations.kSugVitamin,
+    detailKey: AppLocalizations.kSugDetailMorning,
+    bgColor: Color(0xFFFDE8EF), habitColor: Color(0xFFEC4899),
+    purposes: ['purposeHealth', 'any'],
+    timeOfDay: 'morning',
+  ),
+
+  // ── Health & Fitness
+  _SuggestedHabit(
+    emoji: '🏃', nameKey: AppLocalizations.kSugWalk,
+    detailKey: AppLocalizations.kSugDetail10kSteps,
+    bgColor: Color(0xFFFDE8E8), habitColor: Color(0xFFEF4444),
+    purposes: ['purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '💪', nameKey: AppLocalizations.kSugExercise,
+    detailKey: AppLocalizations.kSugDetail30min,
+    bgColor: Color(0xFFFDE8F4), habitColor: Color(0xFFEC4899),
+    purposes: ['purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🏊', nameKey: AppLocalizations.kSugSwim,
+    detailKey: AppLocalizations.kSugDetail30min,
+    bgColor: Color(0xFFE8E8FD), habitColor: Color(0xFF4B3FF5),
+    purposes: ['purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🧘', nameKey: AppLocalizations.kSugMeditate,
+    detailKey: AppLocalizations.kSugDetail10min,
+    bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E),
+    purposes: ['purposeMindfulness', 'purposeHealth', 'any'],
+    timeOfDay: 'morning',
+  ),
+  _SuggestedHabit(
+    emoji: '🤸', nameKey: AppLocalizations.kSugStretch,
+    detailKey: AppLocalizations.kSugDetail10min,
+    bgColor: Color(0xFFFDE8E8), habitColor: Color(0xFFEF4444),
+    purposes: ['purposeHealth', 'any'],
+    timeOfDay: 'morning',
+  ),
+  _SuggestedHabit(
+    emoji: '🚿', nameKey: AppLocalizations.kSugColdShower,
+    detailKey: AppLocalizations.kSugDetail1min,
+    bgColor: Color(0xFFE8F4FD), habitColor: Color(0xFF3B82F6),
+    purposes: ['purposeHealth', 'any'],
+    timeOfDay: 'morning',
+  ),
+  _SuggestedHabit(
+    emoji: '🍬', nameKey: AppLocalizations.kSugNoSugar,
+    detailKey: AppLocalizations.kSugDetailDaily,
+    bgColor: Color(0xFFFDFDE8), habitColor: Color(0xFFF5A623),
+    purposes: ['purposeHealth', 'any'],
+  ),
+
+  // ── Mindfulness
+  _SuggestedHabit(
+    emoji: '📝', nameKey: AppLocalizations.kSugJournal,
+    detailKey: AppLocalizations.kSugDetail5min,
+    bgColor: Color(0xFFFDFDE8), habitColor: Color(0xFFF5A623),
+    purposes: ['purposeMindfulness', 'purposeLearning', 'any'],
+    timeOfDay: 'evening',
+  ),
+  _SuggestedHabit(
+    emoji: '🙏', nameKey: AppLocalizations.kSugGratitude,
+    detailKey: AppLocalizations.kSugDetail5min,
+    bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E),
+    purposes: ['purposeMindfulness', 'any'],
+    timeOfDay: 'evening',
+  ),
+  _SuggestedHabit(
+    emoji: '🌬️', nameKey: AppLocalizations.kSugDeepBreath,
+    detailKey: AppLocalizations.kSugDetail1min,
+    bgColor: Color(0xFFE8F4FD), habitColor: Color(0xFF3B82F6),
+    purposes: ['purposeMindfulness', 'purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '📵', nameKey: AppLocalizations.kSugNoPhone,
+    detailKey: AppLocalizations.kSugDetail30min,
+    bgColor: Color(0xFFF0E8FD), habitColor: Color(0xFF8B5CF6),
+    purposes: ['purposeMindfulness', 'purposeProductivity', 'any'],
+    timeOfDay: 'evening',
+  ),
+
+  // ── Learning & Productivity
+  _SuggestedHabit(
+    emoji: '📕', nameKey: AppLocalizations.kSugRead,
+    detailKey: AppLocalizations.kSugDetail20min,
+    bgColor: Color(0xFFFDEFE8), habitColor: Color(0xFFF5A623),
+    purposes: ['purposeLearning', 'purposeProductivity', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🗒️', nameKey: AppLocalizations.kSugPlanDay,
+    detailKey: AppLocalizations.kSugDetail5min,
+    bgColor: Color(0xFFE8F0FD), habitColor: Color(0xFF14B8A6),
+    purposes: ['purposeProductivity', 'any'],
+    timeOfDay: 'morning',
+  ),
+  _SuggestedHabit(
+    emoji: '🇬🇧', nameKey: AppLocalizations.kSugStudyEnglish,
+    detailKey: AppLocalizations.kSugDetail20min,
+    bgColor: Color(0xFFFDE8EF), habitColor: Color(0xFFEC4899),
+    roles: ['roleStudent', 'roleWorker', 'any'],
+    purposes: ['purposeLearning', 'purposeProductivity', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🎨', nameKey: AppLocalizations.kSugPracticeMusic,
+    detailKey: AppLocalizations.kSugDetail20min,
+    bgColor: Color(0xFFFDE8EF), habitColor: Color(0xFFEC4899),
+    purposes: ['purposeLearning', 'any'],
+  ),
+
+  // ── Lifestyle & Home
+  _SuggestedHabit(
+    emoji: '🧹', nameKey: AppLocalizations.kSugCleanUp,
+    detailKey: AppLocalizations.kSugDetail15min,
+    bgColor: Color(0xFFE8F0FD), habitColor: Color(0xFF14B8A6),
+    roles: ['roleHomemaker', 'roleParent', 'any'],
+    purposes: ['any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🍳', nameKey: AppLocalizations.kSugCooking,
+    detailKey: AppLocalizations.kSugDetailDaily,
+    bgColor: Color(0xFFFDFDE8), habitColor: Color(0xFFF5A623),
+    roles: ['roleHomemaker', 'roleParent', 'any'],
+    purposes: ['purposeHealth', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🌿', nameKey: AppLocalizations.kSugGoOutside,
+    detailKey: AppLocalizations.kSugDetail30min,
+    bgColor: Color(0xFFE8FDE8), habitColor: Color(0xFF22C55E),
+    purposes: ['purposeHealth', 'purposeMindfulness', 'any'],
+  ),
+  _SuggestedHabit(
+    emoji: '🐕', nameKey: AppLocalizations.kSugWalkDog,
+    detailKey: AppLocalizations.kSugDetail30min,
+    bgColor: Color(0xFFFDE8E8), habitColor: Color(0xFFEF4444),
+    purposes: ['any'],
+  ),
+
+  // ── Parent-specific
+  _SuggestedHabit(
+    emoji: '🧒', nameKey: AppLocalizations.kSugChildPlay,
+    detailKey: AppLocalizations.kSugDetail30min,
+    bgColor: Color(0xFFFDEFE8), habitColor: Color(0xFFF5A623),
+    roles: ['roleParent'],
+    purposes: ['any'],
+  ),
 ];
+
+// ─── Daily tips pool ─────────────────────────────────────────────────────────
+
+class _TipData {
+  final String emoji;
+  final String titleKey;
+  final String bodyKey;
+  const _TipData({required this.emoji, required this.titleKey, required this.bodyKey});
+}
+
+const _tipsPool = <_TipData>[
+  _TipData(emoji: '🌱', titleKey: AppLocalizations.kTipStartSmall, bodyKey: AppLocalizations.kTipStartSmallBody),
+  _TipData(emoji: '📚', titleKey: AppLocalizations.kTipStackHabits, bodyKey: AppLocalizations.kTipStackHabitsBody),
+  _TipData(emoji: '💡', titleKey: AppLocalizations.kTipConsistency, bodyKey: AppLocalizations.kTipConsistencyBody),
+  _TipData(emoji: '🧠', titleKey: AppLocalizations.kTipIdentity, bodyKey: AppLocalizations.kTipIdentityBody),
+  _TipData(emoji: '⏰', titleKey: AppLocalizations.kTipTiming, bodyKey: AppLocalizations.kTipTimingBody),
+  _TipData(emoji: '🎯', titleKey: AppLocalizations.kTipTrack, bodyKey: AppLocalizations.kTipTrackBody),
+  _TipData(emoji: '🌅', titleKey: AppLocalizations.kTipMorning, bodyKey: AppLocalizations.kTipMorningBody),
+];
+
+// ─── ExploreScreen ───────────────────────────────────────────────────────────
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -46,24 +236,115 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  static const _categoryKeys = [
+    AppLocalizations.kAll, AppLocalizations.kHealth,
+    AppLocalizations.kFitness, AppLocalizations.kMind,
+    AppLocalizations.kLifestyle,
+  ];
+
+  static const _catTagMap = {
+    AppLocalizations.kHealth: ['purposeHealth'],
+    AppLocalizations.kFitness: ['purposeHealth'],
+    AppLocalizations.kMind: ['purposeMindfulness'],
+    AppLocalizations.kLifestyle: ['roleHomemaker', 'roleParent'],
+  };
+
   String _searchQuery = '';
   String _selectedCategoryKey = AppLocalizations.kAll;
 
-  List<_SuggestedHabit> _filteredSuggestions(LanguageProvider lang) {
+  // Bookmarked tip indices
+  final Set<int> _bookmarkedTips = {};
+  final Set<int> _likedTips = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTipPrefs();
+  }
+
+  Future<void> _loadTipPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bookmarks = prefs.getStringList('tip_bookmarks') ?? [];
+    final likes = prefs.getStringList('tip_likes') ?? [];
+    if (mounted) {
+      setState(() {
+        _bookmarkedTips.addAll(bookmarks.map(int.parse));
+        _likedTips.addAll(likes.map(int.parse));
+      });
+    }
+  }
+
+  Future<void> _toggleBookmark(int tipIndex) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (_bookmarkedTips.contains(tipIndex)) {
+        _bookmarkedTips.remove(tipIndex);
+      } else {
+        _bookmarkedTips.add(tipIndex);
+      }
+    });
+    await prefs.setStringList('tip_bookmarks', _bookmarkedTips.map((e) => '$e').toList());
+  }
+
+  Future<void> _toggleLike(int tipIndex) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (_likedTips.contains(tipIndex)) {
+        _likedTips.remove(tipIndex);
+      } else {
+        _likedTips.add(tipIndex);
+      }
+    });
+    await prefs.setStringList('tip_likes', _likedTips.map((e) => '$e').toList());
+  }
+
+  /// Daily tip index rotates by day-of-year.
+  int get _todayTipIndex {
+    final now = DateTime.now();
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    return dayOfYear % _tipsPool.length;
+  }
+
+  /// Filter suggestions based on user profile + search + category.
+  List<_SuggestedHabit> _filteredSuggestions(
+      LanguageProvider lang, AppUser? user) {
     final habitProvider = context.read<HabitProvider>();
     final existingNames =
         habitProvider.habits.map((h) => h.name.toLowerCase()).toSet();
 
-    var list = _allSuggestions
-        .where((s) => !existingNames.contains(lang.tr(s.nameKey).toLowerCase()))
-        .toList();
+    final userRole = user?.role ?? 'any';
+    final userPurpose = user?.purpose ?? 'any';
+    var list = _allSuggestions.where((s) {
+      if (existingNames.contains(lang.tr(s.nameKey).toLowerCase())) return false;
+      final roleMatch = s.roles.contains('any') || s.roles.contains(userRole);
+      final purposeMatch = s.purposes.contains('any') || s.purposes.contains(userPurpose);
+      return roleMatch && purposeMatch;
+    }).toList();
+
+    if (_selectedCategoryKey != AppLocalizations.kAll) {
+      final cats = _catTagMap[_selectedCategoryKey] ?? const [];
+      if (cats.isNotEmpty) {
+        list = list
+            .where((s) =>
+                s.purposes.any(cats.contains) || s.roles.any(cats.contains))
+            .toList();
+      }
+    }
 
     if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
       list = list
-          .where((s) =>
-              lang.tr(s.nameKey).toLowerCase().contains(_searchQuery.toLowerCase()))
+          .where((s) => lang.tr(s.nameKey).toLowerCase().contains(query))
           .toList();
     }
+
+    list.sort((a, b) {
+      final aScore = (a.roles.contains(userRole) ? 1 : 0) +
+          (a.purposes.contains(userPurpose) ? 1 : 0);
+      final bScore = (b.roles.contains(userRole) ? 1 : 0) +
+          (b.purposes.contains(userPurpose) ? 1 : 0);
+      return bScore.compareTo(aScore);
+    });
 
     return list;
   }
@@ -77,7 +358,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${suggestion.emoji} ${lang.tr(suggestion.nameKey)} ${lang.tr(AppLocalizations.kAdded)}'),
+        content: Text(
+            '${suggestion.emoji} ${lang.tr(suggestion.nameKey)} ${lang.tr(AppLocalizations.kAdded)}'),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
@@ -90,13 +372,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget build(BuildContext context) {
     final lang = context.watch<LanguageProvider>();
     context.watch<HabitProvider>();
-    final suggestions = _filteredSuggestions(lang);
+    final user = context.watch<UserProvider>().user;
+    final suggestions = _filteredSuggestions(lang, user);
 
-    final categoryKeys = [
-      AppLocalizations.kAll, AppLocalizations.kHealth,
-      AppLocalizations.kFitness, AppLocalizations.kMind,
-      AppLocalizations.kLifestyle,
-    ];
+    final tipIndex = _todayTipIndex;
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -107,7 +386,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              Text(lang.tr(AppLocalizations.kExplore), style: AppTextStyles.heading2.copyWith(color: context.textP)),
+              Text(lang.tr(AppLocalizations.kExplore),
+                  style: AppTextStyles.heading2.copyWith(color: context.textP)),
               const SizedBox(height: 16),
 
               // Search bar
@@ -142,12 +422,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 height: 36,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: categoryKeys.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemCount: _categoryKeys.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
                   itemBuilder: (_, i) {
-                    final isActive = categoryKeys[i] == _selectedCategoryKey;
+                    final isActive = _categoryKeys[i] == _selectedCategoryKey;
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedCategoryKey = categoryKeys[i]),
+                      onTap: () =>
+                          setState(() => _selectedCategoryKey = _categoryKeys[i]),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
@@ -159,7 +440,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            lang.tr(categoryKeys[i]),
+                            lang.tr(_categoryKeys[i]),
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -174,7 +455,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Suggested habits
+              // Suggested for you
               _SectionHeader(title: lang.tr(AppLocalizations.kSuggestedForYou)),
               const SizedBox(height: 12),
               if (suggestions.isEmpty)
@@ -201,7 +482,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: suggestions.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemBuilder: (_, i) => _SuggestedCard(
                       suggestion: suggestions[i],
                       lang: lang,
@@ -236,7 +517,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           const SizedBox(height: 4),
                           Text(
                             lang.tr(s.nameKey),
-                            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500),
+                            style: GoogleFonts.inter(
+                                fontSize: 11, fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -278,20 +560,38 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Tips
-              _SectionHeader(title: lang.tr(AppLocalizations.kTipsMotivation)),
+              // Today's tip (daily rotation)
+              _SectionHeader(title: lang.tr(AppLocalizations.kTodaysTip)),
               const SizedBox(height: 12),
-              _TipCard(
-                title: lang.tr(AppLocalizations.kTipStartSmall),
-                body: lang.tr(AppLocalizations.kTipStartSmallBody),
-                emoji: '🌱',
+              _DailyTipCard(
+                tip: _tipsPool[tipIndex],
+                lang: lang,
+                isBookmarked: _bookmarkedTips.contains(tipIndex),
+                isLiked: _likedTips.contains(tipIndex),
+                onBookmark: () => _toggleBookmark(tipIndex),
+                onLike: () => _toggleLike(tipIndex),
               ),
-              const SizedBox(height: 12),
-              _TipCard(
-                title: lang.tr(AppLocalizations.kTipStackHabits),
-                body: lang.tr(AppLocalizations.kTipStackHabitsBody),
-                emoji: '📚',
-              ),
+
+              // Bookmarked tips section
+              if (_bookmarkedTips.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                _SectionHeader(title: lang.tr(AppLocalizations.kTipBookmarked)),
+                const SizedBox(height: 12),
+                ..._bookmarkedTips
+                    .where((i) => i != tipIndex)
+                    .map((i) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _DailyTipCard(
+                            tip: _tipsPool[i],
+                            lang: lang,
+                            isBookmarked: true,
+                            isLiked: _likedTips.contains(i),
+                            onBookmark: () => _toggleBookmark(i),
+                            onLike: () => _toggleLike(i),
+                          ),
+                        )),
+              ],
+
               const SizedBox(height: 80),
             ],
           ),
@@ -301,14 +601,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 }
 
+// ─── Widgets ──────────────────────────────────────────────────────────────────
+
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});
 
   @override
-  Widget build(BuildContext context) {
-    return Text(title, style: AppTextStyles.subtitle.copyWith(color: context.textP));
-  }
+  Widget build(BuildContext context) =>
+      Text(title, style: AppTextStyles.subtitle.copyWith(color: context.textP));
 }
 
 class _SuggestedCard extends StatelessWidget {
@@ -316,11 +617,8 @@ class _SuggestedCard extends StatelessWidget {
   final LanguageProvider lang;
   final VoidCallback onAdd;
 
-  const _SuggestedCard({
-    required this.suggestion,
-    required this.lang,
-    required this.onAdd,
-  });
+  const _SuggestedCard(
+      {required this.suggestion, required this.lang, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -353,10 +651,8 @@ class _SuggestedCard extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          Text(
-            lang.tr(suggestion.nameKey),
-            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
+          Text(lang.tr(suggestion.nameKey),
+              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
           Text(lang.tr(suggestion.detailKey), style: AppTextStyles.bodySmall),
         ],
       ),
@@ -369,11 +665,8 @@ class _ChallengeCard extends StatelessWidget {
   final String subtitle;
   final String emoji;
 
-  const _ChallengeCard({
-    required this.title,
-    required this.subtitle,
-    required this.emoji,
-  });
+  const _ChallengeCard(
+      {required this.title, required this.subtitle, required this.emoji});
 
   @override
   Widget build(BuildContext context) {
@@ -389,36 +682,35 @@ class _ChallengeCard extends StatelessWidget {
         children: [
           Text(emoji, style: const TextStyle(fontSize: 24)),
           const Spacer(),
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
+          Text(title,
+              style: GoogleFonts.inter(
+                  fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
           const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(subtitle,
+              style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis),
         ],
       ),
     );
   }
 }
 
-class _TipCard extends StatelessWidget {
-  final String title;
-  final String body;
-  final String emoji;
+class _DailyTipCard extends StatelessWidget {
+  final _TipData tip;
+  final LanguageProvider lang;
+  final bool isBookmarked;
+  final bool isLiked;
+  final VoidCallback onBookmark;
+  final VoidCallback onLike;
 
-  const _TipCard({
-    required this.title,
-    required this.body,
-    required this.emoji,
+  const _DailyTipCard({
+    required this.tip,
+    required this.lang,
+    required this.isBookmarked,
+    required this.isLiked,
+    required this.onBookmark,
+    required this.onLike,
   });
 
   @override
@@ -430,33 +722,70 @@ class _TipCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: context.border),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.textP,
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tip.emoji, style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lang.tr(tip.titleKey),
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.textP,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      lang.tr(tip.bodyKey),
+                      style: AppTextStyles.bodySmall.copyWith(color: context.textS),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  body,
-                  style: AppTextStyles.bodySmall.copyWith(color: context.textS),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _TipAction(
+                icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                color: isLiked ? AppColors.red : context.textS,
+                onTap: onLike,
+              ),
+              const SizedBox(width: 16),
+              _TipAction(
+                icon: isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                color: isBookmarked ? AppColors.primary : context.textS,
+                onTap: onBookmark,
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TipAction extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  const _TipAction({required this.icon, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Icon(icon, color: color, size: 22),
     );
   }
 }

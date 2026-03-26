@@ -191,6 +191,8 @@ class RewardsScreen extends StatelessWidget {
         return lang.tr(AppLocalizations.kHabitCompleted);
       case 'streak_bonus':
         return lang.tr(AppLocalizations.kStreakBonus);
+      case 'habit_uncomplete':
+        return lang.tr(AppLocalizations.kHabitUncompleted);
       case 'reward_redeem':
         return lang.tr(AppLocalizations.kRewardRedeemed);
       default:

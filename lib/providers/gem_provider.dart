@@ -32,6 +32,8 @@ class GemProvider extends ChangeNotifier {
 
   String get levelName => levelNameKeys[level];
 
+  static const _levelThresholds = [0, 51, 151, 301, 501];
+
   /// Returns the l10n key for the current level.
   static const levelNameKeys = [
     '',
@@ -43,27 +45,21 @@ class GemProvider extends ChangeNotifier {
   ];
 
   int get gemsToNextLevel {
-    const thresholds = [0, 51, 151, 301, 501];
     if (level >= 5) return 0;
-    return thresholds[level] - _totalGems;
+    return _levelThresholds[level] - _totalGems;
   }
 
   double get levelProgress {
-    const thresholds = [0, 51, 151, 301, 501];
     if (level >= 5) return 1.0;
-    final prev = level > 1 ? thresholds[level - 1] : 0;
-    final next = thresholds[level];
+    final prev = level > 1 ? _levelThresholds[level - 1] : 0;
+    final next = _levelThresholds[level];
     return (_totalGems - prev) / (next - prev);
   }
 
-  /// Award random gems for completing a habit.
-  /// Returns the amount awarded (for UI animation).
+  /// Award fixed gems for completing a habit (5 per check).
+  /// Returns the total amount awarded (including any challenge bonus).
   Future<int> awardGems({required String habitId, int currentStreak = 0}) async {
-    final rng = Random();
-    int base = rng.nextInt(5) + 1; // 1~5
-    if (currentStreak >= 7) base += 3; // streak bonus
-    if (currentStreak >= 30) base += 5; // monthly bonus
-    if (rng.nextInt(100) < 5) base += 10; // 5% jackpot
+    const base = 5;
 
     final log = GemLog(
       id: const Uuid().v4(),
@@ -71,13 +67,67 @@ class GemProvider extends ChangeNotifier {
       reason: 'habit_complete',
       habitId: habitId,
     );
-
     _totalGems += base;
     _logs.insert(0, log);
     await _repo.saveTotalGems(_totalGems);
     await _repo.addGemLog(log);
     notifyListeners();
+
+    // Award random challenge bonus on streak milestones
+    final milestones = [7, 30, 100];
+    if (milestones.contains(currentStreak)) {
+      final bonus = await _awardChallengeBonus(habitId: habitId, streak: currentStreak);
+      return base + bonus;
+    }
+
     return base;
+  }
+
+  /// Award a random bonus when a challenge milestone is reached.
+  Future<int> _awardChallengeBonus({required String habitId, required int streak}) async {
+    final rng = Random();
+    int bonus;
+    if (streak >= 100) {
+      bonus = rng.nextInt(46) + 30; // 30~75
+    } else if (streak >= 30) {
+      bonus = rng.nextInt(16) + 15; // 15~30
+    } else {
+      bonus = rng.nextInt(6) + 5; // 5~10
+    }
+
+    final log = GemLog(
+      id: const Uuid().v4(),
+      amount: bonus,
+      reason: 'streak_bonus',
+      habitId: habitId,
+    );
+    _totalGems += bonus;
+    _logs.insert(0, log);
+    await _repo.saveTotalGems(_totalGems);
+    await _repo.addGemLog(log);
+    notifyListeners();
+    return bonus;
+  }
+
+  /// Deduct gems when a habit completion is unchecked.
+  Future<void> deductGems({required String habitId}) async {
+    const amount = 5;
+    if (_totalGems < amount) {
+      _totalGems = 0;
+    } else {
+      _totalGems -= amount;
+    }
+
+    final log = GemLog(
+      id: const Uuid().v4(),
+      amount: -amount,
+      reason: 'habit_uncomplete',
+      habitId: habitId,
+    );
+    _logs.insert(0, log);
+    await _repo.saveTotalGems(_totalGems);
+    await _repo.addGemLog(log);
+    notifyListeners();
   }
 
   /// Redeem a reward (spend gems).

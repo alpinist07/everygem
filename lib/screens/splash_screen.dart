@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     final userProvider = context.read<UserProvider>();
-    if (userProvider.isOnboardingCompleted && userProvider.isLoggedIn) {
+    if (userProvider.isOnboardingCompleted) {
       Navigator.pushReplacementNamed(context, AppRoutes.main);
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.onboarding);

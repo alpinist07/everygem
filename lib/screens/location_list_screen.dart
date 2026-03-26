@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import '../providers/location_provider.dart';
 import '../services/location_service.dart';
 
@@ -11,6 +13,7 @@ class LocationListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final locProvider = context.watch<LocationProvider>();
     final reminders = locProvider.reminders;
 
@@ -23,12 +26,12 @@ class LocationListScreen extends StatelessWidget {
           icon: Icon(Icons.chevron_left, color: context.textP),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Location Reminders',
+        title: Text(lang.tr(AppLocalizations.kLocationReminders),
             style: AppTextStyles.heading3.copyWith(color: context.textP)),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context, locProvider),
+        onPressed: () => _showAddDialog(context, lang, locProvider),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add_location_alt, color: Colors.white),
       ),
@@ -39,11 +42,13 @@ class LocationListScreen extends StatelessWidget {
                 children: [
                   const Text('📍', style: TextStyle(fontSize: 48)),
                   const SizedBox(height: 16),
-                  Text('No location reminders',
-                      style: AppTextStyles.subtitle.copyWith(color: context.textP)),
+                  Text(lang.tr(AppLocalizations.kNoLocationReminders),
+                      style:
+                          AppTextStyles.subtitle.copyWith(color: context.textP)),
                   const SizedBox(height: 8),
-                  Text('Tap + to add a location-based reminder',
-                      style: AppTextStyles.bodySmall.copyWith(color: context.textS)),
+                  Text(lang.tr(AppLocalizations.kTapToAddLocation),
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: context.textS)),
                 ],
               ),
             )
@@ -83,7 +88,7 @@ class LocationListScreen extends StatelessWidget {
                                     fontWeight: FontWeight.w600,
                                     color: context.textP)),
                             Text(
-                              '${r.triggerType == 'enter' ? 'On arrive' : 'On leave'}  •  ${r.radiusMeters.round()}m',
+                              '${lang.tr(r.triggerType == 'enter' ? AppLocalizations.kOnArrive : AppLocalizations.kOnLeave)}  •  ${r.radiusMeters.round()}m',
                               style: GoogleFonts.inter(
                                   fontSize: 12, color: context.textS),
                             ),
@@ -103,7 +108,8 @@ class LocationListScreen extends StatelessWidget {
     );
   }
 
-  void _showAddDialog(BuildContext context, LocationProvider locProvider) {
+  void _showAddDialog(
+      BuildContext context, LanguageProvider lang, LocationProvider locProvider) {
     final nameCtrl = TextEditingController();
     String trigger = 'enter';
     double radius = 200;
@@ -113,7 +119,7 @@ class LocationListScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Add Location Reminder'),
+          title: Text(lang.tr(AppLocalizations.kAddLocationReminder)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -121,27 +127,27 @@ class LocationListScreen extends StatelessWidget {
               children: [
                 TextField(
                   controller: nameCtrl,
-                  decoration: const InputDecoration(
-                    hintText: 'Location name (e.g. Gym)',
-                    prefixIcon: Icon(Icons.location_on_outlined),
+                  decoration: InputDecoration(
+                    hintText: lang.tr(AppLocalizations.kLocationNameHint),
+                    prefixIcon: const Icon(Icons.location_on_outlined),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Trigger when:',
+                Text(lang.tr(AppLocalizations.kTriggerWhen),
                     style: GoogleFonts.inter(
                         fontSize: 13, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     ChoiceChip(
-                      label: const Text('Arrive'),
+                      label: Text(lang.tr(AppLocalizations.kArrive)),
                       selected: trigger == 'enter',
                       onSelected: (_) => setState(() => trigger = 'enter'),
                       selectedColor: AppColors.primary.withValues(alpha: 0.2),
                     ),
                     const SizedBox(width: 8),
                     ChoiceChip(
-                      label: const Text('Leave'),
+                      label: Text(lang.tr(AppLocalizations.kLeave)),
                       selected: trigger == 'exit',
                       onSelected: (_) => setState(() => trigger = 'exit'),
                       selectedColor: AppColors.primary.withValues(alpha: 0.2),
@@ -149,9 +155,12 @@ class LocationListScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Radius: ${radius.round()}m',
-                    style: GoogleFonts.inter(
-                        fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(
+                  lang.trWith(AppLocalizations.kRadius,
+                      {'radius': radius.round().toString()}),
+                  style: GoogleFonts.inter(
+                      fontSize: 13, fontWeight: FontWeight.w600),
+                ),
                 Slider(
                   value: radius,
                   min: 50,
@@ -161,16 +170,15 @@ class LocationListScreen extends StatelessWidget {
                   onChanged: (v) => setState(() => radius = v),
                 ),
                 const SizedBox(height: 8),
-                Text('Uses your current location when saved.',
-                    style: GoogleFonts.inter(
-                        fontSize: 11, color: Colors.grey)),
+                Text(lang.tr(AppLocalizations.kUsesCurrentLocation),
+                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(lang.tr(AppLocalizations.kCancel)),
             ),
             TextButton(
               onPressed: () async {
@@ -181,8 +189,9 @@ class LocationListScreen extends StatelessWidget {
                 if (pos == null) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
-                          content: Text('Could not get location. Check permissions.')),
+                      SnackBar(
+                          content: Text(
+                              lang.tr(AppLocalizations.kCouldNotGetLocation))),
                     );
                   }
                   return;
@@ -198,7 +207,7 @@ class LocationListScreen extends StatelessWidget {
 
                 if (ctx.mounted) Navigator.pop(ctx);
               },
-              child: const Text('Save'),
+              child: Text(lang.tr(AppLocalizations.kSave)),
             ),
           ],
         ),

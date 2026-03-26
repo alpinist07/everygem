@@ -19,12 +19,18 @@ class UserProvider extends ChangeNotifier {
     String? surname,
     String? birthdate,
     String? gender,
+    String? email,
+    String? role,
+    String? purpose,
   }) async {
     _user = AppUser(
       name: name,
       surname: surname,
       birthdate: birthdate,
       gender: gender,
+      email: email,
+      role: role,
+      purpose: purpose,
       onboardingCompleted: true,
     );
     await _auth.createUser(_user!);

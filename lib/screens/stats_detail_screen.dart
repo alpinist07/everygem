@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../l10n/app_localizations.dart';
 import '../models/habit.dart';
 import '../providers/habit_provider.dart';
+import '../providers/language_provider.dart';
 import '../widgets/heatmap_calendar.dart';
 import '../widgets/weekly_bar_chart.dart';
 import '../widgets/monthly_trend_chart.dart';
@@ -15,6 +17,7 @@ class StatsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final habits = context.watch<HabitProvider>().habits;
     final heatmapData = _buildHeatmap(habits);
     final weeklyRates = _weeklyRates(habits);
@@ -31,7 +34,7 @@ class StatsDetailScreen extends StatelessWidget {
           icon: Icon(Icons.chevron_left, color: context.textP),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Detailed Stats',
+        title: Text(lang.tr(AppLocalizations.kDetailedStats),
             style: AppTextStyles.heading3.copyWith(color: context.textP)),
         centerTitle: true,
       ),
@@ -41,7 +44,7 @@ class StatsDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Overall heatmap
-            Text('Overview',
+            Text(lang.tr(AppLocalizations.kOverview),
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             Container(
@@ -57,7 +60,7 @@ class StatsDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Weekly bar chart
-            Text('This Week',
+            Text(lang.tr(AppLocalizations.kThisWeek),
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             Container(
@@ -76,7 +79,7 @@ class StatsDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Monthly trend
-            Text('Monthly Trend',
+            Text(lang.tr(AppLocalizations.kMonthlyTrend),
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             Container(
@@ -95,7 +98,7 @@ class StatsDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Per-habit list
-            Text('Habits',
+            Text(lang.tr(AppLocalizations.kHabits),
                 style: AppTextStyles.subtitle.copyWith(color: context.textP)),
             const SizedBox(height: 12),
             ...habits.map((h) => _HabitRow(habit: h)),
@@ -146,7 +149,6 @@ class StatsDetailScreen extends StatelessWidget {
     final rates = <double>[];
     final labels = <String>[];
 
-    // Last 4 weeks
     for (int w = 3; w >= 0; w--) {
       final weekStart = now.subtract(Duration(days: now.weekday - 1 + w * 7));
       int total = 0, done = 0;
@@ -174,6 +176,7 @@ class _HabitRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final total = habit.completionLog.values.where((v) => v).length;
 
     return GestureDetector(
@@ -202,9 +205,10 @@ class _HabitRow extends StatelessWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: context.textP)),
-                  Text('$total days  •  ${habit.currentStreak} streak',
-                      style: GoogleFonts.inter(
-                          fontSize: 11, color: context.textS)),
+                  Text(
+                    '$total ${lang.tr(AppLocalizations.kDays)}  •  ${habit.currentStreak} ${lang.tr(AppLocalizations.kDayStreak)}',
+                    style: GoogleFonts.inter(fontSize: 11, color: context.textS),
+                  ),
                 ],
               ),
             ),

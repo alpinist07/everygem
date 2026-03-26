@@ -268,6 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             if (context.mounted) {
                               showGemPopup(context, amount);
                             }
+                          } else if (wasCompleted && context.mounted) {
+                            await gemProvider.deductGems(habitId: habit.id);
                           }
                         },
                         onEdit: () {
