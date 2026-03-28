@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late DateTime _selectedDate;
   late List<DateTime> _weekDates;
+  final Set<String> _togglingHabits = {};
 
   @override
   void initState() {
@@ -257,19 +258,29 @@ class _HomeScreenState extends State<HomeScreen> {
                         habit: habit,
                         date: _selectedDate,
                         onToggle: () async {
-                          final wasCompleted = habit.isCompletedOn(_selectedDate);
-                          await habitProvider.toggleHabitCompletion(
-                              habit.id, _selectedDate);
-                          if (!wasCompleted && context.mounted) {
-                            final amount = await gemProvider.awardGems(
-                              habitId: habit.id,
-                              currentStreak: habit.currentStreak,
-                            );
-                            if (context.mounted) {
-                              showGemPopup(context, amount);
+                          if (_togglingHabits.contains(habit.id)) return;
+                          _togglingHabits.add(habit.id);
+                          try {
+                            final wasCompleted = habit.isCompletedOn(_selectedDate);
+                            final isToday = _selectedDate.year == DateTime.now().year &&
+                                _selectedDate.month == DateTime.now().month &&
+                                _selectedDate.day == DateTime.now().day;
+                            await habitProvider.toggleHabitCompletion(
+                                habit.id, _selectedDate);
+                            if (!wasCompleted && isToday && context.mounted) {
+                              final newStreak = habit.currentStreak + 1;
+                              final amount = await gemProvider.awardGems(
+                                habitId: habit.id,
+                                currentStreak: newStreak,
+                              );
+                              if (context.mounted) {
+                                showGemPopup(context, amount);
+                              }
+                            } else if (wasCompleted && isToday && context.mounted) {
+                              await gemProvider.deductGems(habitId: habit.id);
                             }
-                          } else if (wasCompleted && context.mounted) {
-                            await gemProvider.deductGems(habitId: habit.id);
+                          } finally {
+                            _togglingHabits.remove(habit.id);
                           }
                         },
                         onEdit: () {

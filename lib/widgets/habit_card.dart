@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
+import '../l10n/app_localizations.dart';
 import '../models/habit.dart';
+import '../providers/language_provider.dart';
 
 class HabitCard extends StatelessWidget {
   final Habit habit;
@@ -21,6 +24,7 @@ class HabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final isCompleted = habit.isCompletedOn(date);
 
     return GestureDetector(
@@ -81,7 +85,7 @@ class HabitCard extends StatelessWidget {
                   if (habit.currentStreak > 0) ...[
                     const SizedBox(height: 2),
                     Text(
-                      '🔥 ${habit.currentStreak} day streak',
+                      '🔥 ${habit.currentStreak} ${lang.tr(AppLocalizations.kDayStreak)}',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: context.textS,
@@ -118,6 +122,7 @@ class HabitCard extends StatelessWidget {
   }
 
   void _showOptions(BuildContext context) {
+    final lang = context.read<LanguageProvider>();
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -140,7 +145,7 @@ class HabitCard extends StatelessWidget {
             if (onEdit != null)
               ListTile(
                 leading: const Icon(Icons.edit_outlined),
-                title: const Text('Edit Habit'),
+                title: Text(lang.tr(AppLocalizations.kEditHabit)),
                 onTap: () {
                   Navigator.pop(context);
                   onEdit!();
@@ -149,8 +154,8 @@ class HabitCard extends StatelessWidget {
             if (onDelete != null)
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Delete Habit',
-                    style: TextStyle(color: Colors.red)),
+                title: Text(lang.tr(AppLocalizations.kDeleteHabit),
+                    style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   onDelete!();

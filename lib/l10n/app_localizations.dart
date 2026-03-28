@@ -1,6 +1,7 @@
-// Everyday Gem — Localization
-// Default language: Korean (ko)
-// Supported: ko, en
+/// Everyday Gem — Localization
+/// Default language: Korean (ko)
+/// Supported: ko, en
+library;
 
 class AppLocalizations {
   final String locale;
@@ -113,16 +114,16 @@ class AppLocalizations {
   static const kEditHabit = 'editHabit';
   static const kHabitName = 'habitName';
   static const kChooseIcon = 'chooseIcon';
+  static const kSuggestedIcons = 'suggestedIcons';
+  static const kAllIcons = 'allIcons';
   static const kChooseColor = 'chooseColor';
+  static const kColorCategory = 'colorCategory';
+  static const kColorCategoryHint = 'colorCategoryHint';
   static const kRepeatOn = 'repeatOn';
   static const kAddReminder = 'addReminder';
   static const kSetReminderTime = 'setReminderTime';
   static const kSaveChanges = 'saveChanges';
   static const kPleaseEnterHabitName = 'pleaseEnterHabitName';
-  static const kSuggestedIcons = 'suggestedIcons';
-  static const kAllIcons = 'allIcons';
-  static const kColorCategory = 'colorCategory';
-  static const kColorCategoryHint = 'colorCategoryHint';
 
   // ─── Explore Screen ───
   static const kExplore = 'explore';
@@ -136,6 +137,8 @@ class AppLocalizations {
   static const kQuickAdd = 'quickAdd';
   static const kChallenges = 'challenges';
   static const kTipsMotivation = 'tipsMotivation';
+  static const kTodaysTip = 'todaysTip';
+  static const kTipBookmarked = 'tipBookmarked';
   static const kNoMatchingHabits = 'noMatchingHabits';
   static const kAllSuggestedAdded = 'allSuggestedAdded';
   static const kAdded = 'added';
@@ -153,18 +156,18 @@ class AppLocalizations {
   static const kSugCleanUp = 'sugCleanUp';
   static const kSugPracticeMusic = 'sugPracticeMusic';
   static const kSugGoOutside = 'sugGoOutside';
+  static const kSugVitamin = 'sugVitamin';
   static const kSugStretch = 'sugStretch';
   static const kSugColdShower = 'sugColdShower';
-  static const kSugPlanDay = 'sugPlanDay';
-  static const kSugNoPhone = 'sugNoPhone';
-  static const kSugCooking = 'sugCooking';
-  static const kSugChildPlay = 'sugChildPlay';
+  static const kSugNoSugar = 'sugNoSugar';
   static const kSugGratitude = 'sugGratitude';
   static const kSugDeepBreath = 'sugDeepBreath';
-  static const kSugVitamin = 'sugVitamin';
+  static const kSugNoPhone = 'sugNoPhone';
+  static const kSugPlanDay = 'sugPlanDay';
   static const kSugStudyEnglish = 'sugStudyEnglish';
-  static const kSugNoSugar = 'sugNoSugar';
+  static const kSugCooking = 'sugCooking';
   static const kSugWalkDog = 'sugWalkDog';
+  static const kSugChildPlay = 'sugChildPlay';
 
   // Suggested habit details
   static const kSugDetail8Glasses = 'sugDetail8Glasses';
@@ -176,9 +179,8 @@ class AppLocalizations {
   static const kSugDetail5min = 'sugDetail5min';
   static const kSugDetail2Servings = 'sugDetail2Servings';
   static const kSugDetail15min = 'sugDetail15min';
-  static const kSugDetail1min = 'sugDetail1min';
   static const kSugDetailMorning = 'sugDetailMorning';
-  static const kSugDetailEvening = 'sugDetailEvening';
+  static const kSugDetail1min = 'sugDetail1min';
   static const kSugDetailDaily = 'sugDetailDaily';
 
   // Challenges
@@ -204,10 +206,6 @@ class AppLocalizations {
   static const kTipTrackBody = 'tipTrackBody';
   static const kTipMorning = 'tipMorning';
   static const kTipMorningBody = 'tipMorningBody';
-  static const kTipBookmark = 'tipBookmark';
-  static const kTipBookmarked = 'tipBookmarked';
-  static const kTipLike = 'tipLike';
-  static const kTodaysTip = 'todaysTip';
 
   // ─── Activity Screen ───
   static const kActivity = 'activity';
@@ -215,6 +213,7 @@ class AppLocalizations {
   static const kWeekly = 'weekly';
   static const kMonthly = 'monthly';
   static const kCompleted = 'completed';
+  static const kPending = 'pending';
   static const kTotal = 'total';
   static const kRate = 'rate';
   static const kActiveHabits = 'activeHabits';
@@ -222,7 +221,6 @@ class AppLocalizations {
   static const kHabitDetails = 'habitDetails';
   static const kThisWeekShort = 'thisWeekShort';
   static const kDayStreak = 'dayStreak';
-  static const kPending = 'pending';
   static const kDays = 'days';
 
   // ─── Profile Screen ───
@@ -274,9 +272,9 @@ class AppLocalizations {
   static const kNoRewardsYet = 'noRewardsYet';
   static const kRecentHistory = 'recentHistory';
   static const kHabitCompleted = 'habitCompleted';
+  static const kHabitUncompleted = 'habitUncompleted';
   static const kStreakBonus = 'streakBonus';
   static const kRewardRedeemed = 'rewardRedeemed';
-  static const kHabitUncompleted = 'habitUncompleted';
   static const kAddReward = 'addReward';
   static const kRewardName = 'rewardName';
   static const kCostInGems = 'costInGems';
@@ -393,25 +391,25 @@ class AppLocalizations {
     kAddMoreLater: '나중에 더 추가할 수 있어요',
     kPleaseEnterName: '이름을 입력해주세요',
     kEmail: '이메일',
-    kEmailHint: '이메일을 입력하세요',
+    kEmailHint: '이메일 주소를 입력하세요',
     kPassword: '비밀번호',
-    kPasswordHint: '비밀번호 (6자 이상)',
+    kPasswordHint: '비밀번호를 입력하세요',
     kConfirmPassword: '비밀번호 확인',
     kConfirmPasswordHint: '비밀번호를 다시 입력하세요',
-    kInvalidEmail: '올바른 이메일 주소를 입력하세요',
-    kPasswordTooShort: '비밀번호는 6자 이상이어야 합니다',
-    kPasswordsDoNotMatch: '비밀번호가 일치하지 않습니다',
-    kChooseRole: '신분을 선택하세요',
+    kInvalidEmail: '유효한 이메일 주소를 입력해주세요',
+    kPasswordTooShort: '비밀번호는 최소 6자 이상이어야 해요',
+    kPasswordsDoNotMatch: '비밀번호가 일치하지 않아요',
+    kChooseRole: '나의 역할을 알려주세요',
     kRoleStudent: '학생',
     kRoleWorker: '직장인',
     kRoleHomemaker: '주부',
     kRoleParent: '부모',
     kRoleOther: '기타',
-    kChoosePurpose: '사용 목적을 선택하세요',
-    kPurposeHealth: '건강/운동',
+    kChoosePurpose: '습관을 쌓는 목적이 뭔가요?',
+    kPurposeHealth: '건강',
     kPurposeProductivity: '생산성',
     kPurposeMindfulness: '마음챙김',
-    kPurposeLearning: '학습/자기계발',
+    kPurposeLearning: '학습',
     kPurposeOther: '기타',
 
     // Habit names
@@ -443,16 +441,16 @@ class AppLocalizations {
     kEditHabit: '습관 수정',
     kHabitName: '습관 이름',
     kChooseIcon: '아이콘 선택',
+    kSuggestedIcons: '추천 아이콘',
+    kAllIcons: '전체 아이콘',
     kChooseColor: '색상 선택',
+    kColorCategory: '카테고리 색상',
+    kColorCategoryHint: '색상으로 습관을 분류할 수 있어요',
     kRepeatOn: '반복 요일',
     kAddReminder: '알림 추가',
     kSetReminderTime: '알림 시간 설정',
     kSaveChanges: '변경사항 저장',
     kPleaseEnterHabitName: '습관 이름을 입력해주세요',
-    kSuggestedIcons: '추천 아이콘',
-    kAllIcons: '모든 아이콘',
-    kColorCategory: '카테고리 색상',
-    kColorCategoryHint: '색상으로 습관을 분류하세요',
 
     // Explore
     kExplore: '탐색',
@@ -466,6 +464,8 @@ class AppLocalizations {
     kQuickAdd: '빠른 추가',
     kChallenges: '챌린지',
     kTipsMotivation: '팁 & 동기부여',
+    kTodaysTip: '오늘의 팁',
+    kTipBookmarked: '북마크한 팁',
     kNoMatchingHabits: '일치하는 습관이 없습니다',
     kAllSuggestedAdded: '추천 습관을 모두 추가했어요!',
     kAdded: '추가됨!',
@@ -483,18 +483,18 @@ class AppLocalizations {
     kSugCleanUp: '정리정돈',
     kSugPracticeMusic: '악기 연습',
     kSugGoOutside: '바깥 활동',
+    kSugVitamin: '비타민 복용',
     kSugStretch: '스트레칭',
     kSugColdShower: '냉수 샤워',
-    kSugPlanDay: '하루 계획',
-    kSugNoPhone: '스크린타임 줄이기',
-    kSugCooking: '직접 요리하기',
-    kSugChildPlay: '아이와 함께 놀기',
+    kSugNoSugar: '설탕 줄이기',
     kSugGratitude: '감사 일기',
     kSugDeepBreath: '깊은 호흡',
-    kSugVitamin: '비타민 복용',
+    kSugNoPhone: '폰 멀리하기',
+    kSugPlanDay: '하루 계획 세우기',
     kSugStudyEnglish: '영어 공부',
-    kSugNoSugar: '설탕 줄이기',
-    kSugWalkDog: '반려동물 산책',
+    kSugCooking: '직접 요리하기',
+    kSugWalkDog: '반려견 산책',
+    kSugChildPlay: '아이와 놀기',
 
     // Suggested details
     kSugDetail8Glasses: '8잔',
@@ -506,9 +506,8 @@ class AppLocalizations {
     kSugDetail5min: '5분',
     kSugDetail2Servings: '2인분',
     kSugDetail15min: '15분',
+    kSugDetailMorning: '아침에',
     kSugDetail1min: '1분',
-    kSugDetailMorning: '아침마다',
-    kSugDetailEvening: '저녁마다',
     kSugDetailDaily: '매일',
 
     // Challenges
@@ -524,20 +523,16 @@ class AppLocalizations {
     kTipStartSmallBody: '하루 2분부터 시작하세요. 꾸준함이 강도를 이깁니다.',
     kTipStackHabits: '습관을 쌓아보세요',
     kTipStackHabitsBody: '기존 습관에 새 습관을 연결하세요. "양치질 후 명상하기"처럼요.',
-    kTipConsistency: '꾸준함이 핵심입니다',
-    kTipConsistencyBody: '"탁월함은 행동이 아니라 습관이다." — 아리스토텔레스',
-    kTipIdentity: '정체성 기반 습관',
-    kTipIdentityBody: '"나는 건강한 사람이다"라고 생각하세요. 행동이 따라옵니다.',
-    kTipTiming: '최적의 타이밍',
-    kTipTimingBody: '아침 습관은 의지력이 가장 충만한 시간에 하세요.',
-    kTipTrack: '추적하면 달라집니다',
-    kTipTrackBody: '"측정되지 않는 것은 관리되지 않는다." — 피터 드러커',
+    kTipConsistency: '꾸준함이 전부예요',
+    kTipConsistencyBody: '완벽하지 않아도 괜찮아요. 하루도 빠지지 않는 것보다 매일 조금씩이 더 중요해요.',
+    kTipIdentity: '정체성부터 바꾸세요',
+    kTipIdentityBody: '"운동을 하려는 사람"이 아니라 "운동하는 사람"이 되세요. 정체성이 행동을 이끌어요.',
+    kTipTiming: '최적의 시간을 찾으세요',
+    kTipTimingBody: '언제 에너지가 가장 충만한지 파악하고, 그때 중요한 습관을 하세요.',
+    kTipTrack: '기록이 동기가 돼요',
+    kTipTrackBody: '진행 상황을 추적하는 것만으로도 완료할 가능성이 2배 높아져요.',
     kTipMorning: '아침 루틴의 힘',
-    kTipMorningBody: '성공한 사람들의 공통점: 의도적인 아침 루틴.',
-    kTipBookmark: '북마크',
-    kTipBookmarked: '북마크됨',
-    kTipLike: '좋아요',
-    kTodaysTip: '오늘의 명언',
+    kTipMorningBody: '아침 첫 시간을 어떻게 보내느냐가 하루 전체 생산성을 결정해요.',
 
     // Activity
     kActivity: '활동',
@@ -545,6 +540,7 @@ class AppLocalizations {
     kWeekly: '주간',
     kMonthly: '월간',
     kCompleted: '완료',
+    kPending: '미완료',
     kTotal: '전체',
     kRate: '달성률',
     kActiveHabits: '활성 습관',
@@ -552,7 +548,6 @@ class AppLocalizations {
     kHabitDetails: '습관 상세',
     kThisWeekShort: '이번 주',
     kDayStreak: '일 연속',
-    kPending: '미완료',
     kDays: '일',
 
     // Profile
@@ -604,7 +599,7 @@ class AppLocalizations {
     kNoRewardsYet: '아직 보상이 없어요. +를 눌러 추가하세요!',
     kRecentHistory: '최근 기록',
     kHabitCompleted: '습관 완료',
-    kHabitUncompleted: '습관 취소',
+    kHabitUncompleted: '습관 미완료',
     kStreakBonus: '연속 보너스',
     kRewardRedeemed: '보상 교환',
     kAddReward: '보상 추가',
@@ -724,25 +719,25 @@ class AppLocalizations {
     kAddMoreLater: 'You may add more habits later',
     kPleaseEnterName: 'Please enter your name',
     kEmail: 'Email',
-    kEmailHint: 'Enter your email',
+    kEmailHint: 'Enter your email address',
     kPassword: 'Password',
-    kPasswordHint: 'Password (min 6 characters)',
-    kConfirmPassword: 'Confirm password',
+    kPasswordHint: 'Enter your password',
+    kConfirmPassword: 'Confirm Password',
     kConfirmPasswordHint: 'Re-enter your password',
     kInvalidEmail: 'Please enter a valid email address',
     kPasswordTooShort: 'Password must be at least 6 characters',
-    kPasswordsDoNotMatch: 'Passwords do not match',
-    kChooseRole: 'What best describes you?',
+    kPasswordsDoNotMatch: "Passwords don't match",
+    kChooseRole: 'What is your role?',
     kRoleStudent: 'Student',
-    kRoleWorker: 'Professional',
+    kRoleWorker: 'Worker',
     kRoleHomemaker: 'Homemaker',
     kRoleParent: 'Parent',
     kRoleOther: 'Other',
-    kChoosePurpose: 'What is your main goal?',
-    kPurposeHealth: 'Health & Fitness',
+    kChoosePurpose: 'What is your goal?',
+    kPurposeHealth: 'Health',
     kPurposeProductivity: 'Productivity',
     kPurposeMindfulness: 'Mindfulness',
-    kPurposeLearning: 'Learning & Growth',
+    kPurposeLearning: 'Learning',
     kPurposeOther: 'Other',
 
     // Habit names
@@ -774,16 +769,16 @@ class AppLocalizations {
     kEditHabit: 'Edit Habit',
     kHabitName: 'Habit name',
     kChooseIcon: 'CHOOSE AN ICON',
+    kSuggestedIcons: 'SUGGESTED ICONS',
+    kAllIcons: 'ALL ICONS',
     kChooseColor: 'CHOOSE A COLOR',
+    kColorCategory: 'CATEGORY COLOR',
+    kColorCategoryHint: 'Use colors to categorize your habits',
     kRepeatOn: 'REPEAT ON',
     kAddReminder: 'ADD REMINDER',
     kSetReminderTime: 'Set reminder time',
     kSaveChanges: 'Save Changes',
     kPleaseEnterHabitName: 'Please enter a habit name',
-    kSuggestedIcons: 'Suggested icons',
-    kAllIcons: 'All icons',
-    kColorCategory: 'Category color',
-    kColorCategoryHint: 'Use colors to categorize your habits',
 
     // Explore
     kExplore: 'Explore',
@@ -797,6 +792,8 @@ class AppLocalizations {
     kQuickAdd: 'Quick Add',
     kChallenges: 'Challenges',
     kTipsMotivation: 'Tips & Motivation',
+    kTodaysTip: "Today's Tip",
+    kTipBookmarked: 'Bookmarked Tips',
     kNoMatchingHabits: 'No matching habits found',
     kAllSuggestedAdded: 'You\'ve added all suggested habits!',
     kAdded: 'added!',
@@ -814,18 +811,18 @@ class AppLocalizations {
     kSugCleanUp: 'Clean Up',
     kSugPracticeMusic: 'Practice Music',
     kSugGoOutside: 'Go Outside',
+    kSugVitamin: 'Take Vitamins',
     kSugStretch: 'Stretch',
     kSugColdShower: 'Cold Shower',
-    kSugPlanDay: 'Plan My Day',
-    kSugNoPhone: 'Screen-Free Time',
-    kSugCooking: 'Cook a Meal',
-    kSugChildPlay: 'Play with Kids',
+    kSugNoSugar: 'No Sugar',
     kSugGratitude: 'Gratitude Journal',
     kSugDeepBreath: 'Deep Breathing',
-    kSugVitamin: 'Take Vitamins',
+    kSugNoPhone: 'Phone-Free Time',
+    kSugPlanDay: 'Plan My Day',
     kSugStudyEnglish: 'Study English',
-    kSugNoSugar: 'No Sugar',
+    kSugCooking: 'Cook at Home',
     kSugWalkDog: 'Walk the Dog',
+    kSugChildPlay: 'Play with Kids',
 
     // Suggested details
     kSugDetail8Glasses: '8 glasses',
@@ -837,10 +834,9 @@ class AppLocalizations {
     kSugDetail5min: '5 min',
     kSugDetail2Servings: '2 servings',
     kSugDetail15min: '15 min',
+    kSugDetailMorning: 'In the morning',
     kSugDetail1min: '1 min',
-    kSugDetailMorning: 'Every morning',
-    kSugDetailEvening: 'Every evening',
-    kSugDetailDaily: 'Every day',
+    kSugDetailDaily: 'Daily',
 
     // Challenges
     kChallenge7Day: '7 Day Streak',
@@ -855,20 +851,16 @@ class AppLocalizations {
     kTipStartSmallBody: 'Begin with just 2 minutes a day. Consistency beats intensity.',
     kTipStackHabits: 'Stack your habits',
     kTipStackHabitsBody: 'Attach a new habit to an existing one. "After I brush my teeth, I will meditate."',
-    kTipConsistency: 'Consistency is the key',
-    kTipConsistencyBody: '"Excellence is not an act, but a habit." — Aristotle',
-    kTipIdentity: 'Identity-based habits',
-    kTipIdentityBody: 'Think "I am a healthy person." The actions follow.',
-    kTipTiming: 'Best timing matters',
-    kTipTimingBody: 'Morning habits use your peak willpower window.',
-    kTipTrack: 'Track and transform',
-    kTipTrackBody: '"What gets measured gets managed." — Peter Drucker',
-    kTipMorning: 'Power of a morning routine',
-    kTipMorningBody: 'What successful people share: an intentional morning routine.',
-    kTipBookmark: 'Bookmark',
-    kTipBookmarked: 'Bookmarked',
-    kTipLike: 'Like',
-    kTodaysTip: "Today's Quote",
+    kTipConsistency: 'Consistency is everything',
+    kTipConsistencyBody: "It's okay to be imperfect. Doing a little every day matters more than never missing.",
+    kTipIdentity: 'Change your identity first',
+    kTipIdentityBody: 'Become "someone who exercises", not "someone trying to exercise". Identity drives behavior.',
+    kTipTiming: 'Find your optimal time',
+    kTipTimingBody: 'Know when your energy peaks and schedule important habits for then.',
+    kTipTrack: 'Tracking is motivating',
+    kTipTrackBody: 'Simply tracking your progress doubles the likelihood of completing your habits.',
+    kTipMorning: 'The power of a morning routine',
+    kTipMorningBody: 'How you spend the first hour of your day determines your overall productivity.',
 
     // Activity
     kActivity: 'Activity',
@@ -876,6 +868,7 @@ class AppLocalizations {
     kWeekly: 'Weekly',
     kMonthly: 'Monthly',
     kCompleted: 'COMPLETED',
+    kPending: 'PENDING',
     kTotal: 'TOTAL',
     kRate: 'RATE',
     kActiveHabits: 'Active Habits',
@@ -883,7 +876,6 @@ class AppLocalizations {
     kHabitDetails: 'Habit Details',
     kThisWeekShort: 'this week',
     kDayStreak: 'day streak',
-    kPending: 'Pending',
     kDays: 'days',
 
     // Profile
@@ -935,7 +927,7 @@ class AppLocalizations {
     kNoRewardsYet: 'No rewards yet. Tap + to add one!',
     kRecentHistory: 'Recent History',
     kHabitCompleted: 'Habit completed',
-    kHabitUncompleted: 'Habit unchecked',
+    kHabitUncompleted: 'Habit uncompleted',
     kStreakBonus: 'Streak bonus',
     kRewardRedeemed: 'Reward redeemed',
     kAddReward: 'Add Reward',
